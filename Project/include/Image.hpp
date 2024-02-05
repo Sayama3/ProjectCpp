@@ -9,6 +9,7 @@
 #include <vector>
 #include <ostream>
 #include <optional>
+#include <filesystem>
 
 struct Vec2UI
 {
@@ -25,11 +26,26 @@ enum class ImageType
 	RGBA = 4,
 };
 
+namespace ImageHelper
+{
+	inline std::vector<std::string> GetImageTypeNames()
+	{
+		return {
+			"None",
+			"Red",
+			"RG",
+			"RGB",
+			"RGBA",
+		};
+	}
+}
+
 class Image {
 public:
 	// Constructors
 	Image();
 	Image(uint32_t width, uint32_t height, uint32_t channels, ImageType imageType, uint8_t value);
+	Image(const std::filesystem::path& path);
 	Image(uint32_t width, uint32_t height, uint32_t channels, ImageType imageType, const std::vector<uint8_t>& image);
 	Image(uint32_t width, uint32_t height, uint32_t channels, ImageType imageType, const uint8_t* imageBuffer, uint64_t imageSize);
 	Image(const Image&);
@@ -45,6 +61,7 @@ public:
 	void SetChannels(uint32_t channels);
 	[[nodiscard]] ImageType GetImageType() const;
 	void SetImageType(ImageType imageType);
+	[[nodiscard]] inline float GetRatio() const {return (float)m_Width / (float)m_Height;}
 
 	uint8_t& at(uint32_t x, uint32_t y, uint32_t channel);
 	[[nodiscard]] const uint8_t& at(uint32_t x, uint32_t y, uint32_t channel) const;

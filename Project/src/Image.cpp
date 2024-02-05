@@ -9,10 +9,32 @@
 #include <stdexcept>
 #include <string>
 #include <format>
-#include "glad/glad.h"
+#include <iostream>
+#include <glad/glad.h>
+#include <stb_image.h>
 
 Image::Image() : m_Width(0), m_Height(0), m_Channels(0), m_ImageType(ImageType::None), m_Image(0)
 {
+}
+
+Image::Image(const std::filesystem::path &path) : m_Width(0), m_Height(0), m_Channels(0), m_ImageType(ImageType::None), m_Image(0)
+{
+	stbi_set_flip_vertically_on_load(false);
+	if(!std::filesystem::exists(path))
+	{
+		std::cout << "The file '" << path << "' doesn't exist." << std::endl;
+		return;
+	}
+
+	std::string strPath = path.string();
+	int width, height, channels;
+	stbi_uc* data = stbi_load(strPath.c_str(), &width, &height, &channels, 0);
+	m_Width = width;
+	m_Height = height;
+	m_Channels = channels;
+	m_ImageType = (ImageType)channels;
+	m_Image.insert(m_Image.end(), data, data + (width * height * channels));
+	stbi_image_free(data);
 }
 
 Image::Image(uint32_t width, uint32_t height, uint32_t channels, ImageType imageType, uint8_t value) : m_Width(width), m_Height(height), m_Channels(channels), m_ImageType(imageType), m_Image(width * height * channels)
@@ -39,7 +61,17 @@ Image::Image(const Image & o) : m_Width(o.m_Width), m_Height(o.m_Height), m_Chan
 	}
 }
 
-Image& Image::operator=(const Image & o) = default;
+Image& Image::operator=(const Image & o)
+{
+	m_Width = o.m_Width;
+	m_Height = o.m_Height;
+	m_Channels = o.m_Channels;
+	m_ImageType = o.m_ImageType;
+	m_Image = o.m_Image;
+
+	if(HasOpenGLTexture()) RecreateOpenGLTexture();
+	return *this;
+}
 Image::~Image()
 {
 	if(m_RenderId)
@@ -100,7 +132,7 @@ void Image::SetImageType(ImageType imageType)
 void Image::UpdateImage()
 {
 	m_Image.resize(m_Width * m_Height * m_Channels);
-	RecreateOpenGLTexture();
+	if(HasOpenGLTexture()) RecreateOpenGLTexture();
 }
 
 Vec2UI Image::GetPosition(uint32_t index) const {
@@ -137,7 +169,11 @@ const uint8_t &Image::operator()(uint32_t x, uint32_t y, uint32_t channel) const
 
 void Image::CreateOpenGLTexture()
 {
-	assert(!m_RenderId.has_value());
+	if(m_RenderId.has_value())
+	{
+		std::cout << "Texture Already Created." << std::endl;
+		return;
+	}
 	GLenum internalFormat = 0;
 	GLenum dataFormat = 0;
 

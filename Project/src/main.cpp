@@ -97,10 +97,14 @@ int main(int, char**)
 	bool show_demo_window = true;
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-	Image image1(512, 512, 4, ImageType::RGBA, 128);
-	Image image2(128, 512, 4, ImageType::RGBA, 255);
-	image1.CreateOpenGLTexture();
-	image2.CreateOpenGLTexture();
+	const uint32_t uMin = 0;
+	const uint32_t uMax = UINT32_MAX;
+	const uint32_t maxChannel = 4;
+
+	std::vector<std::string> imageTypeNames = ImageHelper::GetImageTypeNames();
+	std::vector<Image*> images;
+
+	images.push_back(new Image(R"(C:\Users\ianpo\Pictures\Iannis_V1_Squared.jpg)"));
 
 	// Main loop
 	while (!glfwWindowShouldClose(window))
@@ -143,19 +147,113 @@ int main(int, char**)
 			ImGui::End();
 		}
 
-		// 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
-		if(image1.HasOpenGLTexture())
 		{
-			ImGui::Begin("Image 1");
-			ImGui::Image((void*)(intptr_t)image1.GetRenderId().value(), ImVec2(image1.GetWidth(),image1.GetHeight()));
-			ImGui::End();
+			ImGui::Begin("Image Creator");
+			{
+				if(ImGui::Button("Create Default Image"))
+				{
+					images.push_back(new Image());
+				}
+				ImGui::Separator();
+
+
+				//
+				{
+					static uint32_t width = 255;
+					static uint32_t height = 255;
+					static uint32_t channels = 4;
+					static int type = 4;
+					static uint8_t value = 255;
+					ImGui::DragScalar("Width", ImGuiDataType_U32, &width, 1, &uMin, &uMax, "%d");
+					ImGui::DragScalar("Height", ImGuiDataType_U32, &height, 1, &uMin, &uMax, "%d");
+					ImGui::DragScalar("Channel", ImGuiDataType_U32, &channels, 1, &uMin, &maxChannel,"%d");
+					if (ImGui::BeginCombo("Image Type", imageTypeNames[type].c_str())) {
+						for (int i = 0; i < imageTypeNames.size(); i++) {
+							const bool is_selected = (type == i);
+							if (ImGui::Selectable(imageTypeNames[i].c_str(), is_selected)) {
+								type = i;
+							}
+
+							// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+							if (is_selected) ImGui::SetItemDefaultFocus();
+						}
+						ImGui::EndCombo();
+					}
+					ImGui::DragScalar("Value", ImGuiDataType_U8, &channels, 1, nullptr, nullptr, "%d");
+
+					if(ImGui::Button("Create Image"))
+					{
+						images.push_back(new Image(width, height, channels, (ImageType)type, value));
+					}
+				}
+
+				ImGui::End();
+			}
 		}
-		// 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
-		if(image1.HasOpenGLTexture())
+
+		for (int i = 0; i < images.size(); ++i)
 		{
-			ImGui::Begin("Image 2");
-			ImGui::Image((void*)(intptr_t)image2.GetRenderId().value(), ImVec2(image2.GetWidth(),image2.GetHeight()));
-			ImGui::End();
+			Image* imagePtr = images[i];
+			if(imagePtr == nullptr) continue;
+			Image& img = *imagePtr;
+
+			std::string imageName = std::string("Image ").append(std::to_string(i));
+			bool open = true;
+			ImGui::Begin(imageName.c_str(), &open);
+			{
+				const uint32_t uMin = 0;
+				const uint32_t uMax = UINT32_MAX;
+				const uint32_t maxChannel = 4;
+
+				uint32_t width = img.GetWidth();
+				uint32_t height = img.GetHeight();
+				uint32_t channels = img.GetChannels();
+				int type = (int) img.GetImageType();
+
+				if (ImGui::DragScalar("Width", ImGuiDataType_U32, &width, 1, &uMin, &uMax, "%d")) {
+					img.SetWidth(width);
+				}
+				if (ImGui::DragScalar("Height", ImGuiDataType_U32, &height, 1, &uMin, &uMax, "%d")) {
+					img.SetHeight(height);
+				}
+				if (ImGui::DragScalar("Channel", ImGuiDataType_U32, &channels, 1, &uMin, &maxChannel, "%d")) {
+					img.SetChannels(channels);
+				}
+				if (ImGui::BeginCombo("Image Type", imageTypeNames[type].c_str())) {
+					for (int i = 0; i < imageTypeNames.size(); i++) {
+						const bool is_selected = (type == i);
+						if (ImGui::Selectable(imageTypeNames[i].c_str(), is_selected)) {
+							type = i;
+							img.SetImageType((ImageType) type);
+						}
+
+						// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+						if (is_selected) ImGui::SetItemDefaultFocus();
+					}
+					ImGui::EndCombo();
+				}
+
+				if (img.HasOpenGLTexture()) {
+
+					auto size = ImGui::GetContentRegionMax();
+					size.y = size.x / img.GetRatio();
+					ImGui::Image((void *) (intptr_t) img.GetRenderId().value(), size);
+					if (ImGui::Button("Delete Texture")) {
+						img.DeleteOpenGLTexture();
+					}
+				} else {
+					if (ImGui::Button("Create Texture")) {
+						img.CreateOpenGLTexture();
+					}
+				}
+				ImGui::End();
+			}
+
+			if(!open)
+			{
+				delete imagePtr;
+				images[i] = nullptr;
+			}
 		}
 
 		// Rendering
