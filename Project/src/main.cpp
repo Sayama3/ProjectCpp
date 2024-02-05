@@ -14,6 +14,7 @@
 #include <GLFW/glfw3.h>
 #include <cstdio>
 #include "Image.hpp"
+#include "portable-file-dialogs.h"
 
 // This example can also compile and run with Emscripten! See 'Makefile.emscripten' for details.
 
@@ -150,14 +151,14 @@ int main(int, char**)
 		{
 			ImGui::Begin("Image Creator");
 			{
-				if(ImGui::Button("Create Default Image"))
-				{
-					images.push_back(new Image());
+
+				if (ImGui::CollapsingHeader("Create Default Image")) {
+					if (ImGui::Button("Create")) {
+						images.push_back(new Image());
+					}
 				}
-				ImGui::Separator();
 
-
-				//
+				if (ImGui::CollapsingHeader("Create Image with value"))
 				{
 					static uint32_t width = 255;
 					static uint32_t height = 255;
@@ -181,9 +182,24 @@ int main(int, char**)
 					}
 					ImGui::DragScalar("Value", ImGuiDataType_U8, &channels, 1, nullptr, nullptr, "%d");
 
-					if(ImGui::Button("Create Image"))
+					if(ImGui::Button("Create"))
 					{
 						images.push_back(new Image(width, height, channels, (ImageType)type, value));
+					}
+				}
+				if (ImGui::CollapsingHeader("Create Image with path"))
+				{
+					if(ImGui::Button("Choose Image"))
+					{
+						auto result = pfd::open_file("Select a file", "", {"Image Files (*.pgn, *.jpg)", "*"}, pfd::opt::multiselect);
+						auto results = result.result();
+						if(!results.empty())
+						{
+							for(const auto& path : results)
+							{
+								images.push_back(new Image(path));
+							}
+						}
 					}
 				}
 
@@ -233,6 +249,11 @@ int main(int, char**)
 					ImGui::EndCombo();
 				}
 
+				if (ImGui::Button("Duplicate"))
+				{
+					images.push_back(new Image(img));
+				}
+
 				if (img.HasOpenGLTexture()) {
 
 					auto size = ImGui::GetContentRegionMax();
@@ -277,6 +298,11 @@ int main(int, char**)
 		}
 
 		glfwSwapBuffers(window);
+	}
+
+	// Delete all the image to avoid memory leaks
+	for (auto& image : images) {
+		delete image;
 	}
 
 	// Cleanup
