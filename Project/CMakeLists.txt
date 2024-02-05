@@ -1,35 +1,17 @@
 cmake_minimum_required(VERSION 3.20)
 
 # set enable the debugger (when the debug mode is enable?)
-if(CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]")
-    if(NOT MSVC)
-        set(CMAKE_CXX_FLAGS_DEBUG_INIT "-g")
-    endif()
-endif()
+#if(CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]")
+#    if(NOT MSVC)
+#        set(CMAKE_CXX_FLAGS_DEBUG_INIT "-g")
+#    endif()
+#endif()
+set(CMAKE_CXX_FLAGS_DEBUG_INIT "-g")
 
 set(EXE_TARGET_NAME ProjectCpp)
 
 set(SRC src/main.cpp
         src/ThirdPartiesImplementor.cpp
-        include/Core/Application.hpp
-        src/Core/Application.cpp
-        include/Core/Math.hpp
-        src/Core/Math.cpp
-        include/Core/Macros.hpp
-        include/Core/Logger.hpp
-        src/Core/Logger.cpp
-        include/Events/ApplicationEvent.hpp
-        include/Events/Event.hpp
-        include/Events/KeyEvent.hpp
-        include/Events/MouseEvent.hpp
-        src/Renderer/Renderer.cpp
-        include/Renderer/Renderer.hpp
-        src/Renderer/Buffer.cpp
-        include/Renderer/Buffer.hpp
-        src/Renderer/VertexArray.cpp
-        include/Renderer/VertexArray.hpp
-        include/Core/SmartPointers.hpp
-        include/Renderer/Shader.hpp
 )
 
 add_executable(${EXE_TARGET_NAME} ${SRC})
