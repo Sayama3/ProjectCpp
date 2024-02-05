@@ -12,13 +12,14 @@ set(EXE_TARGET_NAME ProjectCpp)
 
 set(SRC src/main.cpp
         src/ThirdPartiesImplementor.cpp
+        src/Image.cpp
+        include/Image.hpp
 )
 
 add_executable(${EXE_TARGET_NAME} ${SRC})
 
 target_include_directories(${EXE_TARGET_NAME} PUBLIC include)
 target_include_directories(${EXE_TARGET_NAME} PUBLIC vendor)
-target_include_directories(${EXE_TARGET_NAME} PRIVATE src)
 
 if(CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]")
     target_compile_definitions(${EXE_TARGET_NAME} PUBLIC PC_DEBUG)
