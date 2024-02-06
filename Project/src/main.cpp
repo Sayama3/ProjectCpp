@@ -2,6 +2,8 @@
 // Created by ianpo on 17/01/2024.
 //
 
+#define NOMINMAX
+
 #include "glad/glad.h"
 
 #define GLFW_INCLUDE_NONE 1
@@ -126,28 +128,6 @@ int main(int, char**)
 		if (show_demo_window)
 			ImGui::ShowDemoWindow(&show_demo_window);
 
-		// 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
-		{
-			static float f = 0.0f;
-			static int counter = 0;
-
-			ImGui::Begin("Infos!");                          // Create a window called "Hello, world!" and append into it.
-
-			ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-			ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-
-			ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-			if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-				counter++;
-			ImGui::SameLine();
-			ImGui::Text("counter = %d", counter);
-
-			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-			ImGui::End();
-		}
-
 		{
 			ImGui::Begin("Image Creator");
 			{
@@ -203,6 +183,83 @@ int main(int, char**)
 					}
 				}
 
+				if (ImGui::CollapsingHeader("Create Image from other image"))
+				{
+					ImGui::BeginDisabled(images.empty());
+					{
+						static uint64_t indexImage = 0;
+						indexImage = std::min(indexImage, images.size() - 1);
+						std::string currentImage = "Image " + std::to_string(indexImage);
+						if (ImGui::BeginCombo("Image", currentImage.c_str())) {
+							for (int i = 0; i < images.size(); i++) {
+								const bool is_selected = (indexImage == i);
+								std::string iImage = "Image " + std::to_string(i);
+								if (ImGui::Selectable(iImage.c_str(), is_selected)) {
+									indexImage = i;
+								}
+
+								// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+								if (is_selected) ImGui::SetItemDefaultFocus();
+							}
+							ImGui::EndCombo();
+						}
+
+						if(ImGui::Button("Duplicate"))
+						{
+							images.push_back(new Image(*images[indexImage]));
+						}
+						ImGui::EndDisabled();
+					}
+				}
+
+				if (ImGui::CollapsingHeader("Assign Image to another one"))
+				{
+					ImGui::BeginDisabled(images.size() < 1);
+					{
+						static uint64_t sourceImage = 0;
+						sourceImage = std::min(sourceImage, images.size() - 1);
+						std::string currentSourceImage = "Image " + std::to_string(sourceImage);
+						if (ImGui::BeginCombo("Source Image", currentSourceImage.c_str())) {
+							for (int i = 0; i < images.size(); i++) {
+								const bool is_selected = (sourceImage == i);
+								std::string iImage = "Image " + std::to_string(i);
+								if (ImGui::Selectable(iImage.c_str(), is_selected)) {
+									sourceImage = i;
+								}
+
+								// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+								if (is_selected) ImGui::SetItemDefaultFocus();
+							}
+							ImGui::EndCombo();
+						}
+
+						static uint64_t targetImage = 0;
+						targetImage = std::min(targetImage, images.size() - 1);
+						std::string currentTargetImage = "Image " + std::to_string(targetImage);
+						if (ImGui::BeginCombo("Target Image", currentTargetImage.c_str())) {
+							for (int i = 0; i < images.size(); i++) {
+								const bool is_selected = (targetImage == i);
+								std::string iImage = "Image " + std::to_string(i);
+								if (ImGui::Selectable(iImage.c_str(), is_selected)) {
+									targetImage = i;
+								}
+
+								// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+								if (is_selected) ImGui::SetItemDefaultFocus();
+							}
+							ImGui::EndCombo();
+						}
+
+						ImGui::BeginDisabled(targetImage == sourceImage);
+						if(ImGui::Button("Assign"))
+						{
+							images[targetImage] = images[sourceImage];
+						}
+						ImGui::EndDisabled();
+						ImGui::EndDisabled();
+					}
+				}
+
 				ImGui::End();
 			}
 		}
@@ -235,6 +292,7 @@ int main(int, char**)
 				if (ImGui::DragScalar("Channel", ImGuiDataType_U32, &channels, 1, &uMin, &maxChannel, "%d")) {
 					img.SetChannels(channels);
 				}
+
 				if (ImGui::BeginCombo("Image Type", imageTypeNames[type].c_str())) {
 					for (int i = 0; i < imageTypeNames.size(); i++) {
 						const bool is_selected = (type == i);
@@ -248,6 +306,8 @@ int main(int, char**)
 					}
 					ImGui::EndCombo();
 				}
+
+
 
 				if (ImGui::Button("Duplicate"))
 				{
