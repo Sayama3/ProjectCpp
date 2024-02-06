@@ -247,3 +247,58 @@ bool Image::HasOpenGLTexture() const {
 std::optional<uint32_t> Image::GetRenderId() const {
 	return m_RenderId;
 }
+
+Image &Image::operator+=(const Image &rht) {
+	//TODO: Implement the operator "+=".
+	return *this;
+}
+
+Image &Image::operator+=(const uint8_t rht) {
+	//TODO: Implement the operator "+=".
+	return *this;
+}
+
+Image &Image::operator+=(const std::vector<uint8_t> &rht) {
+	//TODO: Implement the operator "+=".
+	return *this;
+}
+
+Image &Image::operator-=(const Image &rht) {
+	//TODO: Implement the operator "-=".
+	return *this;
+}
+
+Image &Image::operator-=(const uint8_t rht) {
+	//TODO: Implement the operator "-=".
+	return *this;
+}
+
+Image &Image::operator-=(const std::vector<uint8_t> &rht) {
+	//TODO: Implement the operator "-=".
+	return *this;
+}
+
+Image &Image::operator^=(const Image &rht) {
+	//TODO: Implement the operator "^=".
+	return *this;
+}
+
+Image &Image::operator^=(const uint8_t rht) {
+	//TODO: Implement the operator "^=".
+	return *this;
+}
+
+Image &Image::operator^=(const std::vector<uint8_t> &rht) {
+	//TODO: Implement the operator "^=".
+	return *this;
+}
+
+Image &Image::operator*=(float rht) {
+	//TODO: Implement the operator "*=".
+	return *this;
+}
+
+Image &Image::operator/=(float rht) {
+	//TODO: Implement the operator "/=".
+	return *this;
+}

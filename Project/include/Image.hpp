@@ -74,6 +74,70 @@ public:
 	void UpdateOpenGLTexture();
 	bool HasOpenGLTexture() const;
 	std::optional<uint32_t> GetRenderId() const;
+public:
+	/*
+	- l’addition avec une autre image (via + et +=) : on additionne les valeurs des pixels correspondants
+	- l’addition avec une valeur (via + et +=): on additionne la valeur à chaque canal de chaque pixel
+	- l’addition avec un pixel (tableau de valeurs) (via + et +=) : on additionne les valeurs du pixel a chaque pixel
+	- la soustraction avec une autre image (via - et -=)
+	- la soustraction avec une valeur(via - et -=)
+	- la soustraction avec un pixel (via - et -=)
+	- la différence avec une autre image (via ^ et ^=)
+	- la différence avec une valeur (via ^ et ^=)
+	- la différence avec un pixel (via ^ et ^=)
+	- la multiplication par une valeur réelle (via * et *=)
+	- la division par une valeur réelle (via / et /=)
+	- le seuillage par une valeur (via <, <=, >, >=, ==, !=) : le résultat sera une image de même taille, avec un
+			seul canal en mode “GRAY”, avec les valeurs 0 ou 255
+	- l’inversement des valeurs (via l’opération unaire ~), le résultat est une image de même taille, ou toutes les
+	valeurs sont (255-valeur d’origine)
+	 */
+	Image& operator+=(const Image& rht);
+	friend Image operator+(Image lft, const Image& rht) {lft += rht; return lft;}
+
+	Image& operator+=(const uint8_t rht);
+	friend Image operator+(Image lft, const uint8_t rht) {lft += rht; return lft;}
+
+	Image& operator+=(const std::vector<uint8_t>& rht);
+	friend Image operator+(Image lft, const std::vector<uint8_t>& rht) {lft += rht; return lft;}
+
+	Image& operator-=(const Image& rht);
+	friend Image operator-(Image lft, const Image& rht) {lft -= rht; return lft;}
+
+	Image& operator-=(const uint8_t rht);
+	friend Image operator-(Image lft, const uint8_t rht) {lft -= rht; return lft;}
+
+	Image& operator-=(const std::vector<uint8_t>& rht);
+	friend Image operator-(Image lft, const std::vector<uint8_t>& rht) {lft -= rht; return lft;}
+
+	Image& operator^=(const Image& rht);
+	friend Image operator^(Image lft, const Image& rht) {lft ^= rht; return lft;}
+
+	Image& operator^=(const uint8_t rht);
+	friend Image operator^(Image lft, const uint8_t rht) {lft ^= rht; return lft;}
+
+	Image& operator^=(const std::vector<uint8_t>& rht);
+	friend Image operator^(Image lft, const std::vector<uint8_t>& rht) {lft ^= rht; return lft;}
+
+	Image& operator*=(float rht);
+	friend Image operator*(Image lft, float rht) {lft *= rht; return lft;}
+
+	Image& operator/=(float rht);
+	friend Image operator/(Image lft, float rht) {lft /= rht; return lft;}
+
+	friend Image operator< (Image lft, const Image& rht) {/*TODO: ce qu'il faut faire*/; return lft;}
+	friend Image operator<=(Image lft, const Image& rht) {/*TODO: ce qu'il faut faire*/; return lft;}
+	friend Image operator> (Image lft, const Image& rht) {/*TODO: ce qu'il faut faire*/; return lft;}
+	friend Image operator>=(Image lft, const Image& rht) {/*TODO: ce qu'il faut faire*/; return lft;}
+	friend Image operator==(Image lft, const Image& rht) {/*TODO: ce qu'il faut faire*/; return lft;}
+	friend Image operator!=(Image lft, const Image& rht) {/*TODO: ce qu'il faut faire*/; return lft;}
+	friend Image operator~ (Image lft) {
+		for (uint8_t & i : lft.m_Image) {
+			i = 255 - i;
+		}
+		return lft;
+	}
+
 private:
 	void UpdateImage();
 	void RecreateOpenGLTexture();

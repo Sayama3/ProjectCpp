@@ -270,6 +270,180 @@ int main(int, char**)
 					}
 				}
 
+				if(ImGui::CollapsingHeader("Operators"))
+				{
+					ImGui::BeginDisabled(images.empty());
+					{
+						static uint64_t leftImage = 0;
+						leftImage = std::min(leftImage, images.size() - 1);
+						std::string currentSourceImage = "Image " + std::to_string(leftImage);
+						if (ImGui::BeginCombo("Left Image", currentSourceImage.c_str())) {
+							for (int i = 0; i < images.size(); i++) {
+								const bool is_selected = (leftImage == i);
+								std::string iImage = "Image " + std::to_string(i);
+								if (ImGui::Selectable(iImage.c_str(), is_selected)) {
+									leftImage = i;
+								}
+
+								// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+								if (is_selected) ImGui::SetItemDefaultFocus();
+							}
+							ImGui::EndCombo();
+						}
+
+						static uint64_t rightImage = 0;
+						rightImage = std::min(rightImage, images.size() - 1);
+						std::string currentTargetImage = "Image " + std::to_string(rightImage);
+						if (ImGui::BeginCombo("Right Image", currentTargetImage.c_str())) {
+							for (int i = 0; i < images.size(); i++) {
+								const bool is_selected = (rightImage == i);
+								std::string iImage = "Image " + std::to_string(i);
+								if (ImGui::Selectable(iImage.c_str(), is_selected)) {
+									rightImage = i;
+								}
+
+								// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+								if (is_selected) ImGui::SetItemDefaultFocus();
+							}
+							ImGui::EndCombo();
+						}
+
+						static uint8_t operatorChannel = 0;
+						ImGui::DragScalar("u8 Value", ImGuiDataType_U8, &operatorChannel, 1, nullptr, nullptr, "%d");
+
+						static float operatorReal = 0;
+						ImGui::DragFloat("Real Value", &operatorReal, 0.005);
+
+						static std::vector<uint8_t> operatorPixels = {};
+						if(ImGui::CollapsingHeader("pixels"))
+						{
+							static uint8_t value = 128;
+							if(ImGui::Button("+"))
+							{
+								operatorPixels.push_back(value);
+							}
+							ImGui::SameLine();
+							ImGui::DragScalar("##ValueForVectorOperator", ImGuiDataType_U8, &value, 1, nullptr, nullptr, "%d");
+							ImGui::Separator();
+							int index = 0;
+							for (auto it = operatorPixels.begin(); it != operatorPixels.end();)
+							{
+								std::string label = std::to_string(index);
+								ImGui::Text("%s :", label.c_str());
+								ImGui::SameLine();
+								std::string name("##ValueForVector_");
+								name += std::to_string(index);
+								ImGui::DragScalar(name.c_str(), ImGuiDataType_U8, &*it, 1, nullptr, nullptr, "%d");
+								ImGui::SameLine();
+								if(ImGui::Button("-"))
+								{
+									it = operatorPixels.erase(it);
+								}
+								else
+								{
+									++it;
+									++index;
+								}
+							}
+						}
+
+						ImGui::Separator();
+
+
+						if(ImGui::Button("operator+ (Image lft, const Image& rht)"))
+						{
+							Image img = *images[leftImage] +  *images[rightImage];
+							images.push_back(new Image(img));
+						}
+						if(ImGui::Button("operator+ (Image lft, const uint8_t rht);"))
+						{
+							Image img = *images[leftImage] +  operatorChannel;
+							images.push_back(new Image(img));
+						}
+						if(ImGui::Button("operator+ (Image lft, const std::vector<uint8_t>& rht);"))
+						{
+							Image img = *images[leftImage] +  *images[rightImage];
+							images.push_back(new Image(img));
+						}
+						if(ImGui::Button("operator- (Image lft, const Image& rht);"))
+						{
+							Image img = *images[leftImage] -  *images[rightImage];
+							images.push_back(new Image(img));
+						}
+						if(ImGui::Button("operator- (Image lft, const uint8_t rht);"))
+						{
+							Image img = *images[leftImage] -  operatorChannel;
+							images.push_back(new Image(img));
+						}
+						if(ImGui::Button("operator- (Image lft, const std::vector<uint8_t>& rht);"))
+						{
+							Image img = *images[leftImage] -  *images[rightImage];
+							images.push_back(new Image(img));
+						}
+						if(ImGui::Button("operator^ (Image lft, const Image& rht);"))
+						{
+							Image img = *images[leftImage] ^  *images[rightImage];
+							images.push_back(new Image(img));
+						}
+						if(ImGui::Button("operator^ (Image lft, const uint8_t rht);"))
+						{
+							Image img = *images[leftImage] ^  operatorChannel;
+							images.push_back(new Image(img));
+						}
+						if(ImGui::Button("operator^ (Image lft, const std::vector<uint8_t>& rht);"))
+						{
+							Image img = *images[leftImage] ^  *images[rightImage];
+							images.push_back(new Image(img));
+						}
+						if(ImGui::Button("operator* (Image lft, float rht);"))
+						{
+							Image img = *images[leftImage] *  operatorReal;
+							images.push_back(new Image(img));
+						}
+						if(ImGui::Button("operator/ (Image lft, float rht);"))
+						{
+							Image img = *images[leftImage] /  operatorReal;
+							images.push_back(new Image(img));
+						}
+						if(ImGui::Button("operator< "))
+						{
+							Image img = *images[leftImage] <  *images[rightImage];
+							images.push_back(new Image(img));
+						}
+						if(ImGui::Button("operator<="))
+						{
+							Image img = *images[leftImage] <= *images[rightImage];
+							images.push_back(new Image(img));
+						}
+						if(ImGui::Button("operator> "))
+						{
+							Image img = *images[leftImage] >  *images[rightImage];
+							images.push_back(new Image(img));
+						}
+						if(ImGui::Button("operator>="))
+						{
+							Image img = *images[leftImage] >= *images[rightImage];
+							images.push_back(new Image(img));
+						}
+						if(ImGui::Button("operator=="))
+						{
+							Image img = *images[leftImage] == *images[rightImage];
+							images.push_back(new Image(img));
+						}
+						if(ImGui::Button("operator!="))
+						{
+							Image img = *images[leftImage] != *images[rightImage];
+							images.push_back(new Image(img));
+						}
+						if(ImGui::Button("operator~ "))
+						{
+							Image img = ~*images[leftImage];
+							images.push_back(new Image(img));
+						}
+						ImGui::EndDisabled();
+					}
+				}
+
 				ImGui::End();
 			}
 		}
