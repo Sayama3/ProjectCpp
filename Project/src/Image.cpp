@@ -160,15 +160,15 @@ uint32_t Image::GetIndex(uint32_t x, uint32_t y) const {return x * m_Height * m_
 
 uint8_t &Image::at(uint32_t x, uint32_t y, uint32_t channel) {
 	if(x >= m_Width) {throw std::out_of_range(std::format("the value x({0}) is outside the limits [0, {1}[", x, m_Width));}
-	if(y >= m_Height) {throw std::out_of_range(std::format("the value y({0}) is outside the limits [0, {1}[", x, m_Height));}
-	if(channel >= m_Channels) {throw std::out_of_range(std::format("the value channel({0}) is outside the limits [0, {1}[", x, m_Channels));}
+	if(y >= m_Height) {throw std::out_of_range(std::format("the value y({0}) is outside the limits [0, {1}[", y, m_Height));}
+	if(channel >= m_Channels) {throw std::out_of_range(std::format("the value channel({0}) is outside the limits [0, {1}[", channel, m_Channels));}
 	return m_Image[GetIndex(x,y) + channel];
 }
 
 const uint8_t &Image::at(uint32_t x, uint32_t y, uint32_t channel) const {
 	if(x >= m_Width) {throw std::out_of_range(std::format("the value x({0}) is outside the limits [0, {1}[", x, m_Width));}
-	if(y >= m_Height) {throw std::out_of_range(std::format("the value y({0}) is outside the limits [0, {1}[", x, m_Height));}
-	if(channel >= m_Channels) {throw std::out_of_range(std::format("the value channel({0}) is outside the limits [0, {1}[", x, m_Channels));}
+	if(y >= m_Height) {throw std::out_of_range(std::format("the value y({0}) is outside the limits [0, {1}[", y, m_Height));}
+	if(channel >= m_Channels) {throw std::out_of_range(std::format("the value channel({0}) is outside the limits [0, {1}[", channel, m_Channels));}
 	return m_Image[GetIndex(x,y) + channel];
 }
 

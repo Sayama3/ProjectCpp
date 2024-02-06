@@ -17,6 +17,7 @@
 #include <cstdio>
 #include "Image.hpp"
 #include "portable-file-dialogs.h"
+#include <unordered_map>
 
 // This example can also compile and run with Emscripten! See 'Makefile.emscripten' for details.
 
@@ -24,6 +25,14 @@ static void glfw_error_callback(int error, const char* description)
 {
 	fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
+
+struct ImageValueData
+{
+	uint32_t x = 0;
+	uint32_t y = 0;
+	uint32_t channel = 0;
+	uint8_t* value = nullptr;
+};
 
 // Main code
 int main(int, char**)
@@ -105,6 +114,7 @@ int main(int, char**)
 	const uint32_t maxChannel = 4;
 
 	std::vector<std::string> imageTypeNames = ImageHelper::GetImageTypeNames();
+	std::unordered_map<uint64_t, ImageValueData> imagesValues;
 	std::vector<Image*> images;
 
 	images.push_back(new Image(R"(C:\Users\ianpo\Pictures\Iannis_V1_Squared.jpg)"));
@@ -147,7 +157,7 @@ int main(int, char**)
 					static uint8_t value = 255;
 					ImGui::DragScalar("Width", ImGuiDataType_U32, &width, 1, &uMin, &uMax, "%d");
 					ImGui::DragScalar("Height", ImGuiDataType_U32, &height, 1, &uMin, &uMax, "%d");
-					ImGui::DragScalar("Channel", ImGuiDataType_U32, &channels, 1, &uMin, &maxChannel,"%d");
+					ImGui::DragScalar("Channels", ImGuiDataType_U32, &channels, 1, &uMin, &maxChannel,"%d");
 					if (ImGui::BeginCombo("Image Type", imageTypeNames[type].c_str())) {
 						for (int i = 0; i < imageTypeNames.size(); i++) {
 							const bool is_selected = (type == i);
@@ -160,7 +170,7 @@ int main(int, char**)
 						}
 						ImGui::EndCombo();
 					}
-					ImGui::DragScalar("Value", ImGuiDataType_U8, &channels, 1, nullptr, nullptr, "%d");
+					ImGui::DragScalar("Value", ImGuiDataType_U8, &value, 1, nullptr, nullptr, "%d");
 
 					if(ImGui::Button("Create"))
 					{
@@ -278,54 +288,86 @@ int main(int, char**)
 				const uint32_t uMax = UINT32_MAX;
 				const uint32_t maxChannel = 4;
 
-				uint32_t width = img.GetWidth();
-				uint32_t height = img.GetHeight();
-				uint32_t channels = img.GetChannels();
-				int type = (int) img.GetImageType();
+				if(ImGui::CollapsingHeader("Image Parameters")) {
+					uint32_t width = img.GetWidth();
+					uint32_t height = img.GetHeight();
+					uint32_t channels = img.GetChannels();
+					int type = (int) img.GetImageType();
 
-				if (ImGui::DragScalar("Width", ImGuiDataType_U32, &width, 1, &uMin, &uMax, "%d")) {
-					img.SetWidth(width);
-				}
-				if (ImGui::DragScalar("Height", ImGuiDataType_U32, &height, 1, &uMin, &uMax, "%d")) {
-					img.SetHeight(height);
-				}
-				if (ImGui::DragScalar("Channel", ImGuiDataType_U32, &channels, 1, &uMin, &maxChannel, "%d")) {
-					img.SetChannels(channels);
-				}
-
-				if (ImGui::BeginCombo("Image Type", imageTypeNames[type].c_str())) {
-					for (int i = 0; i < imageTypeNames.size(); i++) {
-						const bool is_selected = (type == i);
-						if (ImGui::Selectable(imageTypeNames[i].c_str(), is_selected)) {
-							type = i;
-							img.SetImageType((ImageType) type);
-						}
-
-						// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-						if (is_selected) ImGui::SetItemDefaultFocus();
+					if (ImGui::DragScalar("Width", ImGuiDataType_U32, &width, 1, &uMin, &uMax, "%d")) {
+						img.SetWidth(width);
 					}
-					ImGui::EndCombo();
+					if (ImGui::DragScalar("Height", ImGuiDataType_U32, &height, 1, &uMin, &uMax, "%d")) {
+						img.SetHeight(height);
+					}
+					if (ImGui::DragScalar("Channels", ImGuiDataType_U32, &channels, 1, &uMin, &maxChannel, "%d")) {
+						img.SetChannels(channels);
+					}
+
+					if (ImGui::BeginCombo("Image Type", imageTypeNames[type].c_str())) {
+						for (int i = 0; i < imageTypeNames.size(); i++) {
+							const bool is_selected = (type == i);
+							if (ImGui::Selectable(imageTypeNames[i].c_str(), is_selected)) {
+								type = i;
+								img.SetImageType((ImageType) type);
+							}
+
+							// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+							if (is_selected) ImGui::SetItemDefaultFocus();
+						}
+						ImGui::EndCombo();
+					}
 				}
 
+				if(ImGui::CollapsingHeader("Image Values")) {
+					ImageValueData& imgValueData = imagesValues[i];
+					ImGui::DragScalar("X", ImGuiDataType_U32, &imgValueData.x, 1, nullptr, nullptr, "%d");
+					ImGui::DragScalar("Y", ImGuiDataType_U32, &imgValueData.y, 1, nullptr, nullptr, "%d");
+					ImGui::DragScalar("Channel", ImGuiDataType_U32, &imgValueData.channel, 1, nullptr, nullptr, "%d");
 
+					if (ImGui::Button("at(x,y,channel)")) {
+						try {
+							imagesValues[i].value = &img.at(imgValueData.x, imgValueData.y, imgValueData.channel);
+						} catch (std::exception& e) {
+							std::cerr << e.what() << std::endl;
+						}
+					}
+
+					if (ImGui::Button("operator()(x,y,channel)")) {
+						imagesValues[i].value = &img(imgValueData.x, imgValueData.y, imgValueData.channel);
+					}
+
+					if (ImGui::Button("Reset Value")) {
+						imagesValues[i].value = nullptr;
+					}
+
+					if (imagesValues.contains(i) && imagesValues[i].value) {
+						if(ImGui::DragScalar("Value", ImGuiDataType_U8, imagesValues[i].value, 1, nullptr, nullptr, "%d"))
+						{
+							img.UpdateOpenGLTexture();
+						}
+					}
+				}
+
+				if(ImGui::CollapsingHeader("Image")) {
+					if (img.HasOpenGLTexture()) {
+
+						auto size = ImGui::GetContentRegionMax();
+						size.y = size.x / img.GetRatio();
+						ImGui::Image((void *) (intptr_t) img.GetRenderId().value(), size);
+						if (ImGui::Button("Delete Texture")) {
+							img.DeleteOpenGLTexture();
+						}
+					} else {
+						if (ImGui::Button("Create Texture")) {
+							img.CreateOpenGLTexture();
+						}
+					}
+				}
 
 				if (ImGui::Button("Duplicate"))
 				{
 					images.push_back(new Image(img));
-				}
-
-				if (img.HasOpenGLTexture()) {
-
-					auto size = ImGui::GetContentRegionMax();
-					size.y = size.x / img.GetRatio();
-					ImGui::Image((void *) (intptr_t) img.GetRenderId().value(), size);
-					if (ImGui::Button("Delete Texture")) {
-						img.DeleteOpenGLTexture();
-					}
-				} else {
-					if (ImGui::Button("Create Texture")) {
-						img.CreateOpenGLTexture();
-					}
 				}
 				ImGui::End();
 			}
@@ -334,6 +376,7 @@ int main(int, char**)
 			{
 				delete imagePtr;
 				images[i] = nullptr;
+				imagesValues[i].value = nullptr;
 			}
 		}
 
