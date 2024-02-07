@@ -47,6 +47,23 @@ namespace ImageHelper
 		};
 	}
 
+	inline std::string GetImageTypeName(ModelType mt)
+	{
+		switch(mt)
+		{
+
+			case ModelType::None: return "None";
+			case ModelType::Gray: return "Gray";
+			case ModelType::RGB: return "RGB";
+			case ModelType::RGBA: return "RGBA";
+			case ModelType::ARGB: return "ARGB";
+			case ModelType::CMJN: return "CMJN";
+			case ModelType::HSL: return "HSL";
+			case ModelType::HSLA: return "HSLA";
+			default: return "Unknown";
+		}
+	}
+
 	inline uint32_t GetModelTypeChannelCount(ModelType mt)
 	{
 		switch (mt) {
