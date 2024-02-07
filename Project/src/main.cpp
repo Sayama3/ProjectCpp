@@ -17,6 +17,7 @@
 #include <cstdio>
 #include "Image.hpp"
 #include "portable-file-dialogs.h"
+#include "stb_image_write.h"
 #include <unordered_map>
 
 // This example can also compile and run with Emscripten! See 'Makefile.emscripten' for details.
@@ -542,6 +543,21 @@ int main(int, char**)
 				if (ImGui::Button("Duplicate"))
 				{
 					images.push_back(new Image(img));
+				}
+
+				if (ImGui::Button("Save"))
+				{
+					std::string saveName = "Save " + imageName;
+					auto sf = pfd::save_file(saveName, "", {"Image (*.png)", "*.png"});
+					std::string res = sf.result();
+					if(!res.empty())
+					{
+						if(!res.ends_with(".png"))
+						{
+							res.append(".png");
+						}
+						stbi_write_png(res.c_str(), img.GetWidth(), img.GetHeight(), img.GetChannels(), &img(0,0,0), img.GetWidth() * img.GetChannels());
+					}
 				}
 				ImGui::End();
 			}
