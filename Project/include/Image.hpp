@@ -117,7 +117,9 @@ public:
 	void SetChannels(uint32_t channels);
 	[[nodiscard]] ModelType GetImageType() const;
 	void SetImageType(ModelType imageType);
-	[[nodiscard]] inline float GetRatio() const {return (float)m_Width / (float)m_Height;}
+    void ConvertImageToModelType(ModelType imageType);
+    [[nodiscard]] inline float GetRatio() const {return (float)m_Width / (float)m_Height;}
+
 
 	uint8_t& at(uint32_t x, uint32_t y, uint32_t channel);
 	[[nodiscard]] const uint8_t& at(uint32_t x, uint32_t y, uint32_t channel) const;
@@ -180,14 +182,39 @@ public:
 
 	Image& operator/=(float rht);
 	friend Image operator/(Image lft, float rht) {lft /= rht; return lft;}
-
+    //Ceil with another image, not mandatory
 	friend Image operator< (Image lft, const Image& rht) {/*TODO: ce qu'il faut faire*/; return lft;}
 	friend Image operator<=(Image lft, const Image& rht) {/*TODO: ce qu'il faut faire*/; return lft;}
 	friend Image operator> (Image lft, const Image& rht) {/*TODO: ce qu'il faut faire*/; return lft;}
 	friend Image operator>=(Image lft, const Image& rht) {/*TODO: ce qu'il faut faire*/; return lft;}
 	friend Image operator==(Image lft, const Image& rht) {/*TODO: ce qu'il faut faire*/; return lft;}
 	friend Image operator!=(Image lft, const Image& rht) {/*TODO: ce qu'il faut faire*/; return lft;}
-	friend Image operator~ (Image lft) {
+
+    //Ceil with value
+    friend Image operator< (Image im,uint8_t ceil) {
+        auto cha=im.m_Channels;
+        Image image(im.m_Width,im.m_Height,1,ModelType::Gray,255);
+        for (int x = 0; x < im.m_Width; ++x) {
+            for (int y = 0; y < im.m_Height; ++y) {
+                bool pass=true;
+                int av=0;
+                for (int c = 0; c < cha; ++c) {
+                    uint8_t val=im(x,y,c);
+                    if(val>ceil){
+                        pass=false;
+                        break;
+                    }else
+                        av+=val;
+                }
+                image(x,y,0)=pass ? (uint8_t)(av/cha) : ceil;
+            }
+        }
+        //image.CreateOpenGLTexture();
+        return image;
+    }
+
+
+    friend Image operator~ (Image lft) {
 		for (uint8_t & i : lft.m_Image) {
 			i = 255 - i;
 		}

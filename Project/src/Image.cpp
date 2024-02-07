@@ -12,10 +12,10 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <stb_image.h>
+#include <functional>
 
 Image::Image() : m_Width(0), m_Height(0), m_Channels(0), m_ImageType(ModelType::None), m_Image(0)
 {
-	CreateOpenGLTexture();
 }
 
 Image::Image(const std::filesystem::path &path) : m_Width(0), m_Height(0), m_Channels(0), m_ImageType(ModelType::None), m_Image(0)
@@ -40,10 +40,17 @@ Image::Image(const std::filesystem::path &path) : m_Width(0), m_Height(0), m_Cha
 	m_Width = width;
 	m_Height = height;
 	m_Channels = channels;
-	m_ImageType = (ModelType)channels;
+    assert(channels >= 3);
+    if(channels == 3)
+    {
+        m_ImageType = ModelType::RGB;
+    }
+    if(channels == 4)
+    {
+        m_ImageType = ModelType::RGBA;
+    }
 	m_Image.insert(m_Image.end(), data, data + (width * height * channels));
 	stbi_image_free(data);
-	CreateOpenGLTexture();
 }
 
 Image::Image(uint32_t width, uint32_t height, uint32_t channels, ModelType imageType, uint8_t value) : m_Width(width), m_Height(height), m_Channels(channels), m_ImageType(imageType), m_Image(width * height * channels)
@@ -51,7 +58,6 @@ Image::Image(uint32_t width, uint32_t height, uint32_t channels, ModelType image
 	for (unsigned char & channel : m_Image) {
 		channel = value;
 	}
-	CreateOpenGLTexture();
 }
 
 Image::Image(uint32_t width, uint32_t height, uint32_t channels, ModelType imageType, const std::vector<uint8_t>& image) : m_Width(width), m_Height(height), m_Channels(channels), m_ImageType(imageType), m_Image(image)
@@ -68,10 +74,6 @@ Image::Image(uint32_t width, uint32_t height, uint32_t channels, ModelType image
 
 Image::Image(const Image & o) : m_Width(o.m_Width), m_Height(o.m_Height), m_Channels(o.m_Channels), m_ImageType(o.m_ImageType), m_Image(o.m_Image)
 {
-	for (int i = 0; i < m_Image.size(); ++i) {
-		m_Image[i] = o.m_Image[i];
-	}
-	CreateOpenGLTexture();
 }
 
 Image& Image::operator=(const Image & o)
@@ -169,11 +171,105 @@ ModelType Image::GetImageType() const
 {
 	return m_ImageType;
 }
+void Image::ConvertImageToModelType(ModelType imageType){
+    std::function<std::vector<uint8_t>(std::vector<uint8_t>)> conv=[&](std::vector<uint8_t> in ) {
+        if(imageType!=m_ImageType)
+            std::cerr<<"Conversion from "<< (int)m_ImageType << " to " <<(int)imageType<<std::endl;
+        return in;
+    };
+    switch(m_ImageType){
+        case ModelType::Gray:
+            switch(imageType){
+                case ModelType::RGB:
+                    conv = [&](std::vector<uint8_t> in) {
+                        assert(in.size()==1);
+                        uint8_t s=in[0];
+                        in.push_back(s);
+                        in.push_back(s);
+                        return in;
+                    };
+                    break;
+                    case ModelType::RGBA:
+                        conv = [&](std::vector<uint8_t> in) {
+                            assert(in.size()==1);
+                            uint8_t s=in[0];
+                            in.push_back(s);
+                            in.push_back(s);
+                            in.push_back(255);
+                            return in;
+                        };
+                    break;
+            }
+            break;
+        case ModelType::RGB:
+            if(imageType==ModelType::Gray){
+                conv = [&](std::vector<uint8_t> in) {
+                    uint8_t s=0;
+                    for (auto v : in) {
+                        s+=v;
+                    }
+                    in.clear();
+                    in.push_back(s);
+                    return in;
+                };
+            };
+            break;
+        case ModelType::RGBA:
+            if(imageType==ModelType::ARGB) {
+                conv = [&](std::vector<uint8_t> in) {
+                    auto a = in[3];
+                    in[3]=in[2];
+                    in[2]=in[1];
+                    in[1]=in[0];
+                    in[0]=a;
+                    return in;
+                };
+            }
+            if(imageType==ModelType::Gray){
+                conv = [&](std::vector<uint8_t> in) {
+                    uint8_t s=0;
+                    for (auto v : in) {
+                        s+=v;
+                    }
+                    in.clear();
+                    in.push_back(s);
+                    return in;
+                };
+            }
+            break;
+        case ModelType::ARGB:
+            if(imageType==ModelType::RGBA){
+                    conv = [&](std::vector<uint8_t> in) {
+                        auto b = in[3];
+                        in[3]=in[0];
+                        in[0]=in[1];
+                        in[1]=in[2];
+                        in[2]=b;
+                        return in;
+                    };
+            }
+            break;
+    }
+    const auto targetChannelCount=ImageHelper::GetModelTypeChannelCount(imageType);
+    std::vector<uint8_t> newPixels(m_Width*m_Height*targetChannelCount);
+    for (int y = 0; y < m_Height; ++y) {
+        for (int x = 0; x < m_Width; ++x) {
+            auto begin=m_Image.begin()+(y * m_Width * m_Channels + x * m_Channels);
+            std::vector<uint8_t> pix(begin,begin+m_Channels);
+            assert(pix.size()==m_Channels);
+            pix=conv(pix);
+            uint8_t* ptrTrg = &newPixels[(y * m_Width * targetChannelCount + x * targetChannelCount)];
+            std::memcpy(ptrTrg, pix.data(), pix.size() * sizeof(pix[0]));
+        }
+    }
+    m_ImageType=imageType;
+    m_Channels=targetChannelCount;
+    m_Image=newPixels;
+}
 
 void Image::SetImageType(ModelType imageType)
 {
-	// TODO: What do I do ?
-	m_ImageType = imageType;
+    m_ImageType = imageType;
 }
 
 void Image::UpdateImage()
@@ -226,10 +322,11 @@ void Image::CreateOpenGLTexture()
 	GLenum dataFormat = 0;
 
 	uint32_t rendererID;
-	if(m_Channels == 4) { internalFormat = GL_RGBA8; dataFormat = GL_RGBA; }
-	else if(m_Channels == 3) { internalFormat = GL_RGB8; dataFormat = GL_RGB; }
-	else if(m_Channels == 2) { internalFormat = GL_RG8; dataFormat = GL_RG; }
-	else if(m_Channels == 1) { internalFormat = GL_R8; dataFormat = GL_RED; }
+    auto ch = std::max(ImageHelper::GetModelTypeChannelCount(m_ImageType), (uint32_t)3);
+	if(ch == 4) { internalFormat = GL_RGBA8; dataFormat = GL_RGBA; }
+	else if(ch == 3) { internalFormat = GL_RGB8; dataFormat = GL_RGB; }
+	else if(ch == 2) { internalFormat = GL_RG8; dataFormat = GL_RG; }
+	else if(ch == 1) { internalFormat = GL_R8; dataFormat = GL_RED; }
 
 	glCreateTextures(GL_TEXTURE_2D, 1, &rendererID);
 	glTextureStorage2D(rendererID, 1, internalFormat, static_cast<GLsizei>(m_Width), static_cast<GLsizei>(m_Height));
@@ -263,15 +360,35 @@ void Image::UpdateOpenGLTexture()
 	{
 		//TODO: recreate the image following the display mode.
 		GLenum dataFormat = 0;
-		if(m_Channels == 4) { dataFormat = GL_RGBA; }
-		else if(m_Channels == 3) { dataFormat = GL_RGB; }
-		else if(m_Channels == 2) { dataFormat = GL_RG; }
-		else if(m_Channels == 1) { dataFormat = GL_RED; }
+        if(m_Channels == 4) { dataFormat = GL_RGBA; }
+        else if(m_Channels == 3) { dataFormat = GL_RGB; }
+        else if(m_Channels == 2) { dataFormat = GL_RG; }
+        else if(m_Channels == 1) { dataFormat = GL_RED; }
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        //glTextureSubImage2D(m_RenderId.value(), 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE,m_Image.data());
+        //return;
+        if(m_ImageType!=ModelType::RGB && m_ImageType!=ModelType::RGBA) {
+            Image newImg(*this);
+            switch (m_ImageType) {
 
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-		glTextureSubImage2D(m_RenderId.value(), 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, m_Image.data());
-	}
+                case ModelType::Gray:
+                case ModelType::HSL :
+                    newImg.ConvertImageToModelType(ModelType::RGB);
+                case ModelType::RGB:
+                    dataFormat = GL_RGB;
+                    break;
+                case ModelType::HSLA:
+                case ModelType::ARGB:
+                    newImg.ConvertImageToModelType(ModelType::RGBA);
+                case ModelType::RGBA:
+                    dataFormat = GL_RGBA;
+                    break;
+            }
+            glTextureSubImage2D(m_RenderId.value(), 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE,newImg.m_Image.data());
+        }else{
+            glTextureSubImage2D(m_RenderId.value(), 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE,m_Image.data());
+        }
+    }
 }
 
 bool Image::HasOpenGLTexture() const {

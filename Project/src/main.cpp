@@ -34,6 +34,8 @@ struct ImageValueData
 	uint32_t channel = 0;
 	uint8_t* value = nullptr;
 };
+const std::string path=R"(D:\Data\Projects\Unity\ProjectCpp\Project\Data\seminaire.png)";
+//std::string path=R"(C:\Users\ianpo\Pictures\Iannis_V1_Squared.jpg)";
 
 // Main code
 int main(int, char**)
@@ -117,9 +119,9 @@ int main(int, char**)
 	std::vector<std::string> imageTypeNames = ImageHelper::GetImageTypeNames();
 	std::unordered_map<uint64_t, ImageValueData> imagesValues;
 	std::vector<Image*> images;
-
-	images.push_back(new Image(R"(C:\Users\ianpo\Pictures\Iannis_V1_Squared.jpg)"));
-
+    Image* im=new Image(path);
+    images.push_back(im);
+    im->CreateOpenGLTexture();
 	// Main loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -145,7 +147,9 @@ int main(int, char**)
 
 				if (ImGui::CollapsingHeader("Create Default Image")) {
 					if (ImGui::Button("Create")) {
-						images.push_back(new Image());
+                        Image* im=new Image(path);
+                        images.push_back(im);
+                        im->CreateOpenGLTexture();
 					}
 				}
 
@@ -315,6 +319,9 @@ int main(int, char**)
 						static float operatorReal = 0;
 						ImGui::DragFloat("Real Value", &operatorReal, 0.005);
 
+                        static int operatorInt = 200;
+                        ImGui::DragInt("Integer Value", &operatorInt, 1,0,255);
+
 						static std::vector<uint8_t> operatorPixels = {};
 						if(ImGui::CollapsingHeader("pixels"))
 						{
@@ -406,7 +413,12 @@ int main(int, char**)
 							Image img = *images[leftImage] /  operatorReal;
 							images.push_back(new Image(img));
 						}
-						if(ImGui::Button("operator< "))
+                        if(ImGui::Button("operator< "))
+                        {
+                            Image img = *images[leftImage] < (uint8_t) operatorInt;
+                            images.push_back(new Image(img));
+                        }
+						if(ImGui::Button("operator < IMG (experimental) "))
 						{
 							Image img = *images[leftImage] <  *images[rightImage];
 							images.push_back(new Image(img));
