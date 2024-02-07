@@ -17,13 +17,16 @@ struct Vec2UI
 	uint32_t y;
 };
 
-enum class ImageType
+enum class ModelType
 {
 	None = 0,
-	Red = 1,
-	RG = 2,
-	RGB = 3,
-	RGBA = 4,
+	Gray,
+	RGB,
+	RGBA,
+	ARGB,
+	CMJN,
+	HSL,
+	HSLA
 };
 
 namespace ImageHelper
@@ -44,10 +47,10 @@ class Image {
 public:
 	// Constructors
 	Image();
-	Image(uint32_t width, uint32_t height, uint32_t channels, ImageType imageType, uint8_t value);
+	Image(uint32_t width, uint32_t height, uint32_t channels, ModelType imageType, uint8_t value);
 	Image(const std::filesystem::path& path);
-	Image(uint32_t width, uint32_t height, uint32_t channels, ImageType imageType, const std::vector<uint8_t>& image);
-	Image(uint32_t width, uint32_t height, uint32_t channels, ImageType imageType, const uint8_t* imageBuffer, uint64_t imageSize);
+	Image(uint32_t width, uint32_t height, uint32_t channels, ModelType imageType, const std::vector<uint8_t>& image);
+	Image(uint32_t width, uint32_t height, uint32_t channels, ModelType imageType, const uint8_t* imageBuffer, uint64_t imageSize);
 	Image(const Image&);
 	Image& operator=(const Image&);
 	~Image();
@@ -59,8 +62,8 @@ public:
 	void SetHeight(uint32_t height);
 	[[nodiscard]] uint32_t GetChannels() const;
 	void SetChannels(uint32_t channels);
-	[[nodiscard]] ImageType GetImageType() const;
-	void SetImageType(ImageType imageType);
+	[[nodiscard]] ModelType GetImageType() const;
+	void SetImageType(ModelType imageType);
 	[[nodiscard]] inline float GetRatio() const {return (float)m_Width / (float)m_Height;}
 
 	uint8_t& at(uint32_t x, uint32_t y, uint32_t channel);
@@ -149,7 +152,7 @@ private:
 	uint32_t m_Width;
 	uint32_t m_Height;
 	uint32_t m_Channels;
-	ImageType m_ImageType;
+	ModelType m_ImageType;
 	std::vector<uint8_t> m_Image;
 	std::optional<uint32_t> m_RenderId;
 };

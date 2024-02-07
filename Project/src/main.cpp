@@ -174,7 +174,7 @@ int main(int, char**)
 
 					if(ImGui::Button("Create"))
 					{
-						images.push_back(new Image(width, height, channels, (ImageType)type, value));
+						images.push_back(new Image(width, height, channels, (ModelType)type, value));
 					}
 				}
 				if (ImGui::CollapsingHeader("Create Image with path"))
@@ -483,7 +483,7 @@ int main(int, char**)
 							const bool is_selected = (type == i);
 							if (ImGui::Selectable(imageTypeNames[i].c_str(), is_selected)) {
 								type = i;
-								img.SetImageType((ImageType) type);
+								img.SetImageType((ModelType) type);
 							}
 
 							// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)

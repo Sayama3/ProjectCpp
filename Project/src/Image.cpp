@@ -13,12 +13,12 @@
 #include <glad/glad.h>
 #include <stb_image.h>
 
-Image::Image() : m_Width(0), m_Height(0), m_Channels(0), m_ImageType(ImageType::None), m_Image(0)
+Image::Image() : m_Width(0), m_Height(0), m_Channels(0), m_ImageType(ModelType::None), m_Image(0)
 {
 	CreateOpenGLTexture();
 }
 
-Image::Image(const std::filesystem::path &path) : m_Width(0), m_Height(0), m_Channels(0), m_ImageType(ImageType::None), m_Image(0)
+Image::Image(const std::filesystem::path &path) : m_Width(0), m_Height(0), m_Channels(0), m_ImageType(ModelType::None), m_Image(0)
 {
 	if(!std::filesystem::exists(path))
 	{
@@ -40,13 +40,13 @@ Image::Image(const std::filesystem::path &path) : m_Width(0), m_Height(0), m_Cha
 	m_Width = width;
 	m_Height = height;
 	m_Channels = channels;
-	m_ImageType = (ImageType)channels;
+	m_ImageType = (ModelType)channels;
 	m_Image.insert(m_Image.end(), data, data + (width * height * channels));
 	stbi_image_free(data);
 	CreateOpenGLTexture();
 }
 
-Image::Image(uint32_t width, uint32_t height, uint32_t channels, ImageType imageType, uint8_t value) : m_Width(width), m_Height(height), m_Channels(channels), m_ImageType(imageType), m_Image(width * height * channels)
+Image::Image(uint32_t width, uint32_t height, uint32_t channels, ModelType imageType, uint8_t value) : m_Width(width), m_Height(height), m_Channels(channels), m_ImageType(imageType), m_Image(width * height * channels)
 {
 	for (unsigned char & channel : m_Image) {
 		channel = value;
@@ -54,13 +54,13 @@ Image::Image(uint32_t width, uint32_t height, uint32_t channels, ImageType image
 	CreateOpenGLTexture();
 }
 
-Image::Image(uint32_t width, uint32_t height, uint32_t channels, ImageType imageType, const std::vector<uint8_t>& image) : m_Width(width), m_Height(height), m_Channels(channels), m_ImageType(imageType), m_Image(image)
+Image::Image(uint32_t width, uint32_t height, uint32_t channels, ModelType imageType, const std::vector<uint8_t>& image) : m_Width(width), m_Height(height), m_Channels(channels), m_ImageType(imageType), m_Image(image)
 {
 	assert(image.size() == width * height * channels);
 	CreateOpenGLTexture();
 }
 
-Image::Image(uint32_t width, uint32_t height, uint32_t channels, ImageType imageType, const uint8_t *imageBuffer, uint64_t imageSize) : m_Width(width), m_Height(height), m_Channels(channels), m_ImageType(imageType), m_Image(imageBuffer, imageBuffer + imageSize)
+Image::Image(uint32_t width, uint32_t height, uint32_t channels, ModelType imageType, const uint8_t *imageBuffer, uint64_t imageSize) : m_Width(width), m_Height(height), m_Channels(channels), m_ImageType(imageType), m_Image(imageBuffer, imageBuffer + imageSize)
 {
 	assert(imageSize == width * height * channels);
 	CreateOpenGLTexture();
@@ -102,6 +102,18 @@ uint32_t Image::GetWidth() const
 
 void Image::SetWidth(uint32_t width)
 {
+	std::vector<uint8_t> newImage(width * m_Height * m_Channels, 0);
+
+	for (int x = 0; x < std::min(width, m_Width); ++x) {
+		for (int y = 0; y < m_Height; ++y) {
+			for (int c = 0; c < m_Channels; ++c) {
+				int indexNewImg = y * width * m_Channels + x * m_Channels + c;
+				int indexImg = y * m_Width * m_Channels + x * m_Channels + c;
+				newImage[indexNewImg] = m_Image[indexImg];
+			}
+		}
+	}
+	m_Image = newImage;
 	//TODO: Resize the image.
 	m_Width = width;
 	UpdateImage();
@@ -114,7 +126,18 @@ uint32_t Image::GetHeight() const
 
 void Image::SetHeight(uint32_t height)
 {
-	//TODO: Resize the image.
+	std::vector<uint8_t> newImage(m_Width * height * m_Channels, 0);
+
+	for (int x = 0; x < m_Width; ++x) {
+		for (int y = 0; y < std::min(height, m_Height); ++y) {
+			for (int c = 0; c < m_Channels; ++c) {
+				int indexNewImg = y * m_Width * m_Channels + x * m_Channels + c;
+				int indexImg = y * m_Width * m_Channels + x * m_Channels + c;
+				newImage[indexNewImg] = m_Image[indexImg];
+			}
+		}
+	}
+	m_Image = newImage;
 	m_Height = height;
 	UpdateImage();
 }
@@ -126,17 +149,28 @@ uint32_t Image::GetChannels() const
 
 void Image::SetChannels(uint32_t channels)
 {
-	//TODO: Resize the image.
+	std::vector<uint8_t> newImage(m_Width * m_Height * channels, 0);
+
+	for (int x = 0; x < m_Width; ++x) {
+		for (int y = 0; y < m_Height; ++y) {
+			for (int c = 0; c < std::min(m_Channels, channels); ++c) {
+				int indexNewImg = y * m_Width * channels + x * channels + c;
+				int indexImg = y * m_Width * m_Channels + x * m_Channels + c;
+				newImage[indexNewImg] = m_Image[indexImg];
+			}
+		}
+	}
+	m_Image = newImage;
 	m_Channels = channels;
 	UpdateImage();
 }
 
-ImageType Image::GetImageType() const
+ModelType Image::GetImageType() const
 {
 	return m_ImageType;
 }
 
-void Image::SetImageType(ImageType imageType)
+void Image::SetImageType(ModelType imageType)
 {
 	// TODO: What do I do ?
 	m_ImageType = imageType;
@@ -149,14 +183,14 @@ void Image::UpdateImage()
 }
 
 Vec2UI Image::GetPosition(uint32_t index) const {
-	uint32_t x = index / (m_Height * m_Channels);
-	uint32_t y = (index / m_Channels) % m_Height;
+	uint32_t y = index / (m_Width * m_Channels);
+	uint32_t x = (index / m_Channels) % m_Width;
 	return {x, y};
 }
 
 uint32_t Image::GetIndex(Vec2UI pos) const {return GetIndex(pos.x, pos.y);}
 
-uint32_t Image::GetIndex(uint32_t x, uint32_t y) const {return x * m_Height * m_Channels + y * m_Channels;};
+uint32_t Image::GetIndex(uint32_t x, uint32_t y) const {return y * m_Width * m_Channels + x * m_Channels;};
 
 uint8_t &Image::at(uint32_t x, uint32_t y, uint32_t channel) {
 	if(x >= m_Width) {throw std::out_of_range(std::format("the value x({0}) is outside the limits [0, {1}[", x, m_Width));}
@@ -203,11 +237,9 @@ void Image::CreateOpenGLTexture()
 	//TODO: Add parameter on the Texture API to be able to change this type of parameters.
 	glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTextureParameteri(rendererID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-	glTextureSubImage2D(rendererID, 0, 0, 0, static_cast<GLsizei>(m_Width), static_cast<GLsizei>(m_Height), dataFormat, GL_UNSIGNED_BYTE, m_Image.data());
 
 	m_RenderId = rendererID;
+	UpdateOpenGLTexture();
 }
 
 void Image::DeleteOpenGLTexture() {
@@ -229,12 +261,14 @@ void Image::UpdateOpenGLTexture()
 {
 	if(m_RenderId)
 	{
-		GLenum internalFormat = 0;
+		//TODO: recreate the image following the display mode.
 		GLenum dataFormat = 0;
-		if(m_Channels == 4) { internalFormat = GL_RGBA8; dataFormat = GL_RGBA; }
-		else if(m_Channels == 3) { internalFormat = GL_RGB8; dataFormat = GL_RGB; }
-		else if(m_Channels == 2) { internalFormat = GL_RG8; dataFormat = GL_RG; }
-		else if(m_Channels == 1) { internalFormat = GL_R8; dataFormat = GL_RED; }
+		if(m_Channels == 4) { dataFormat = GL_RGBA; }
+		else if(m_Channels == 3) { dataFormat = GL_RGB; }
+		else if(m_Channels == 2) { dataFormat = GL_RG; }
+		else if(m_Channels == 1) { dataFormat = GL_RED; }
+
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 		glTextureSubImage2D(m_RenderId.value(), 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, m_Image.data());
 	}
