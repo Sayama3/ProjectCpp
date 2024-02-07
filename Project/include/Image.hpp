@@ -43,6 +43,7 @@ namespace ImageHelper
 			"ARGB",
 			"CMJN",
 			"HSL",
+			"HSLA",
 		};
 	}
 
