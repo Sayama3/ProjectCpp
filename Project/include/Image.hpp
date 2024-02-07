@@ -26,8 +26,10 @@ enum class ModelType
 	ARGB,
 	CMJN,
 	HSL,
-	HSLA
+	HSLA,
 };
+
+
 
 namespace ImageHelper
 {
@@ -35,11 +37,44 @@ namespace ImageHelper
 	{
 		return {
 			"None",
-			"Red",
-			"RG",
+			"Gray",
 			"RGB",
 			"RGBA",
+			"ARGB",
+			"CMJN",
+			"HSL",
 		};
+	}
+
+	inline uint32_t GetModelTypeChannelCount(ModelType mt)
+	{
+		switch (mt) {
+			case ModelType::None:
+				return 0;
+				break;
+			case ModelType::Gray:
+				return 1;
+				break;
+			case ModelType::RGB:
+				return 3;
+				break;
+			case ModelType::RGBA:
+				return 4;
+				break;
+			case ModelType::ARGB:
+				return 4;
+				break;
+			case ModelType::CMJN:
+				return 3;
+				break;
+			case ModelType::HSL:
+				return 3;
+				break;
+			case ModelType::HSLA:
+				return 4;
+				break;
+		}
+		return 0;
 	}
 }
 

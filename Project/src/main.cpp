@@ -456,7 +456,8 @@ int main(int, char**)
 
 			std::string imageName = std::string("Image ").append(std::to_string(i));
 			bool open = true;
-			ImGui::Begin(imageName.c_str(), &open);
+			ImGuiWindowFlags_ flags = ImGuiWindowFlags_AlwaysVerticalScrollbar;
+			ImGui::Begin(imageName.c_str(), &open, flags);
 			{
 				const uint32_t uMin = 0;
 				const uint32_t uMax = UINT32_MAX;
@@ -525,8 +526,7 @@ int main(int, char**)
 
 				if(ImGui::CollapsingHeader("Image")) {
 					if (img.HasOpenGLTexture()) {
-
-						auto size = ImGui::GetContentRegionMax();
+						auto size = ImGui::GetContentRegionAvail();
 						size.y = size.x / img.GetRatio();
 						ImGui::Image((void *) (intptr_t) img.GetRenderId().value(), size);
 						if (ImGui::Button("Delete Texture")) {
