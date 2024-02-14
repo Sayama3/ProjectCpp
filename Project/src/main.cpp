@@ -34,7 +34,9 @@ struct ImageValueData
 	uint32_t channel = 0;
 	uint8_t* value = nullptr;
 };
-const std::string path=R"(D:\Data\Projects\Unity\ProjectCpp\Project\Data\seminaire.png)";
+//const std::string path=R"(D:\Data\Projects\Unity\ProjectCpp\Project\Data\seminaire.png)";
+const std::string path=R"(E:\C++Projects\ProjectCpp\Project\Data\seminaire.png)";
+//greyPix.png)";
 //std::string path=R"(C:\Users\ianpo\Pictures\Iannis_V1_Squared.jpg)";
 
 // Main code

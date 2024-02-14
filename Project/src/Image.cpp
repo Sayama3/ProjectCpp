@@ -399,57 +399,98 @@ std::optional<uint32_t> Image::GetRenderId() const {
 	return m_RenderId;
 }
 
+
 Image &Image::operator+=(const Image &rht) {
-	//TODO: Implement the operator "+=".
-	return *this;
+    return *this+=rht.m_Image;
 }
 
 Image &Image::operator+=(const uint8_t rht) {
-	//TODO: Implement the operator "+=".
-	return *this;
+    for (int x = 0; x < m_Width; ++x) {
+        for (int y = 0; y < m_Height; ++y) {
+            for (int c = 0; c < m_Channels; ++c) {
+                this->add(x,y,c,rht);
+            }
+        }
+    }
+    return *this;
 }
 
 Image &Image::operator+=(const std::vector<uint8_t> &rht) {
-	//TODO: Implement the operator "+=".
-	return *this;
+    for (int x = 0; x < m_Width; ++x) {
+        for (int y = 0; y < m_Height; ++y) {
+            for (int c = 0; c < m_Channels; ++c) {
+                this->add(x,y,c,rht[GetIndex(x,y)+c]);
+            }
+        }
+    }
+    return *this;
 }
 
 Image &Image::operator-=(const Image &rht) {
-	//TODO: Implement the operator "-=".
-	return *this;
+    return *this-=rht.m_Image;
 }
 
 Image &Image::operator-=(const uint8_t rht) {
-	//TODO: Implement the operator "-=".
-	return *this;
+	return *this+=-rht;
 }
 
 Image &Image::operator-=(const std::vector<uint8_t> &rht) {
-	//TODO: Implement the operator "-=".
-	return *this;
+    for (int x = 0; x < m_Width; ++x) {
+        for (int y = 0; y < m_Height; ++y) {
+            for (int c = 0; c < m_Channels; ++c) {
+                this->add(x,y,c,-1*rht[GetIndex(x,y)+c]);
+            }
+        }
+    }
+    return *this;
 }
 
 Image &Image::operator^=(const Image &rht) {
-	//TODO: Implement the operator "^=".
-	return *this;
+	return *this^=rht.m_Image;
 }
 
 Image &Image::operator^=(const uint8_t rht) {
-	//TODO: Implement the operator "^=".
+    for (int x = 0; x < m_Width; ++x) {
+        for (int y = 0; y < m_Height; ++y) {
+            for (int c = 0; c < m_Channels; ++c) {
+                this->at(x,y,c)=std::abs(this->at(x,y,c)-rht);
+            }
+        }
+    }
 	return *this;
 }
 
 Image &Image::operator^=(const std::vector<uint8_t> &rht) {
-	//TODO: Implement the operator "^=".
+    for (int x = 0; x < m_Width; ++x) {
+        for (int y = 0; y < m_Height; ++y) {
+            for (int c = 0; c < m_Channels; ++c) {
+                this->at(x,y,c)=std::abs(this->at(x,y,c)-rht[GetIndex(x,y)+c]);
+            }
+        }
+    }
 	return *this;
 }
 
 Image &Image::operator*=(float rht) {
-	//TODO: Implement the operator "*=".
-	return *this;
+    for (int x = 0; x < m_Width; ++x) {
+        for (int y = 0; y < m_Height; ++y) {
+            for (int c = 0; c < m_Channels; ++c) {
+                this->set(x,y,c,this->at(x,y,c)*rht);
+            }
+        }
+    }
+    return *this;
 }
 
 Image &Image::operator/=(float rht) {
-	//TODO: Implement the operator "/=".
-	return *this;
+	return *this*=(1/rht);
+}
+
+Image &Image::set(uint32_t x, uint32_t y, uint32_t channel, int32_t val) {
+   this->at(x, y, channel)=val < 0 ? 0 : (val > 255 ? 255 : val);
+   return *this;
+}
+Image &Image::add(uint32_t x, uint32_t y, uint32_t channel, int16_t val) {
+    this->set(x, y, channel,this->at(x,y,channel)+val);
+    return *this;
 }

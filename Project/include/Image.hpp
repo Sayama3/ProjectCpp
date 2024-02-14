@@ -127,7 +127,10 @@ public:
 	uint8_t& operator() (uint32_t x, uint32_t y, uint32_t channel);
 	const uint8_t& operator() (uint32_t x, uint32_t y, uint32_t channel) const;
 
-	void CreateOpenGLTexture();
+    Image& set(uint32_t x, uint32_t y, uint32_t channel,int32_t val);
+    Image& add(uint32_t x, uint32_t y, uint32_t channel, int16_t val);
+
+        void CreateOpenGLTexture();
 	void DeleteOpenGLTexture();
 	void UpdateOpenGLTexture();
 	bool HasOpenGLTexture() const;
