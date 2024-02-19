@@ -192,37 +192,35 @@ public:
 	friend Image operator>=(Image lft, const Image& rht) {/*TODO: ce qu'il faut faire*/; return lft;}
 	friend Image operator==(Image lft, const Image& rht) {/*TODO: ce qu'il faut faire*/; return lft;}
 	friend Image operator!=(Image lft, const Image& rht) {/*TODO: ce qu'il faut faire*/; return lft;}
-
-    //Ceil with value
-    friend Image operator< (Image im,uint8_t ceil) {
-        auto cha=im.m_Channels;
-        Image image(im.m_Width,im.m_Height,1,ModelType::Gray,255);
-        for (int x = 0; x < im.m_Width; ++x) {
-            for (int y = 0; y < im.m_Height; ++y) {
-                bool pass=true;
-                int av=0;
-                for (int c = 0; c < cha; ++c) {
-                    uint8_t val=im(x,y,c);
-                    if(val>ceil){
-                        pass=false;
-                        break;
-                    }else
-                        av+=val;
-                }
-                image(x,y,0)=pass ? (uint8_t)(av/cha) : ceil;
-            }
+    static uint8_t Invert (uint8_t lft) {
+        return 255-lft;
+    }
+    friend Image operator~ (Image lft) {
+        for (uint8_t & i : lft.m_Image) {
+            i = Invert(i);
         }
-        //image.CreateOpenGLTexture();
-        return image;
+        return lft;
+    }
+    //Ceil with value
+    friend Image operator< (Image im,uint8_t ceil);
+    friend Image operator>=(Image lft, uint8_t ceil) {return ~(~lft<Invert(ceil));}
+    friend Image operator<=(Image lft, uint8_t ceil) {
+        //Ceiling an image with <= over < doesn't make a lot of sense we are not treating boolean values, it means that we also include i.e don't put equal to the ceil value that are already equal to the ceil
+        //But in order to have operator with different behaviour we consider ceil+1 cause we dealing with int values
+        return lft<ceil+1;
+    }
+    friend Image operator> (Image lft, uint8_t ceil) {
+        //Same for > using >= which uses directly <
+        return lft>=ceil+1;
+    }
+    friend Image operator==(Image lft, uint8_t ceil) {return (lft>=ceil)<=ceil;}
+    friend Image operator!=(Image lft, uint8_t ceil) {
+        //With current logic of setting each value "outside" of the ceil to the ceil, != with a uint8 value returns same picture even if we'd compose it using other operators
+        return lft;
     }
 
 
-    friend Image operator~ (Image lft) {
-		for (uint8_t & i : lft.m_Image) {
-			i = 255 - i;
-		}
-		return lft;
-	}
+
 
 private:
 	void UpdateImage();

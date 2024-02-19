@@ -485,6 +485,27 @@ Image &Image::operator*=(float rht) {
 Image &Image::operator/=(float rht) {
 	return *this*=(1/rht);
 }
+Image operator<(Image im, uint8_t ceil) {
+    auto cha=im.m_Channels;
+    Image image(im.m_Width,im.m_Height,1,ModelType::Gray,255);
+    for (int x = 0; x < im.m_Width; ++x) {
+        for (int y = 0; y < im.m_Height; ++y) {
+            bool pass=true;
+            int av=0;
+            for (int c = 0; c < cha; ++c) {
+                uint8_t val=im(x,y,c);
+                if(val>ceil){
+                    pass=false;
+                    break;
+                }else
+                    av+=val;
+            }
+            image(x,y,0)=pass ? (uint8_t)(av/cha) : ceil;
+        }
+    }
+    //image.CreateOpenGLTexture();
+    return image;
+}
 
 Image &Image::set(uint32_t x, uint32_t y, uint32_t channel, int32_t val) {
    this->at(x, y, channel)=val < 0 ? 0 : (val > 255 ? 255 : val);
@@ -494,3 +515,5 @@ Image &Image::add(uint32_t x, uint32_t y, uint32_t channel, int16_t val) {
     this->set(x, y, channel,this->at(x,y,channel)+val);
     return *this;
 }
+
+

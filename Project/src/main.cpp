@@ -419,33 +419,58 @@ int main(int, char**)
                         {
                             Image img = *images[leftImage] < (uint8_t) operatorInt;
                             images.push_back(new Image(img));
+                        }if(ImGui::Button("operator<="))
+                        {
+                            Image img = *images[leftImage] <= (uint8_t) operatorInt;
+                            images.push_back(new Image(img));
                         }
-						if(ImGui::Button("operator < IMG (experimental) "))
+                        if(ImGui::Button("operator> "))
+                        {
+                            Image img = *images[leftImage] >  (uint8_t) operatorInt;
+                            images.push_back(new Image(img));
+                        }
+                        if(ImGui::Button("operator>="))
+                        {
+                            Image img = *images[leftImage] >= (uint8_t) operatorInt;
+                            images.push_back(new Image(img));
+                        }
+                        if(ImGui::Button("operator=="))
+                        {
+                            Image img = *images[leftImage] == (uint8_t) operatorInt;
+                            images.push_back(new Image(img));
+                        }
+                        if(ImGui::Button("operator!="))
+                        {
+                            Image img = *images[leftImage] != (uint8_t) operatorInt;
+                            images.push_back(new Image(img));
+                        }
+                        ImGui::Text("With images, experimental");
+                        if(ImGui::Button("operator < IMG "))
 						{
 							Image img = *images[leftImage] <  *images[rightImage];
 							images.push_back(new Image(img));
 						}
-						if(ImGui::Button("operator<="))
+						if(ImGui::Button("operator <= IMG "))
 						{
 							Image img = *images[leftImage] <= *images[rightImage];
 							images.push_back(new Image(img));
 						}
-						if(ImGui::Button("operator> "))
+						if(ImGui::Button("operator > IMG  "))
 						{
 							Image img = *images[leftImage] >  *images[rightImage];
 							images.push_back(new Image(img));
 						}
-						if(ImGui::Button("operator>="))
+						if(ImGui::Button("operator >= IMG "))
 						{
 							Image img = *images[leftImage] >= *images[rightImage];
 							images.push_back(new Image(img));
 						}
-						if(ImGui::Button("operator=="))
+						if(ImGui::Button("operator == IMG "))
 						{
 							Image img = *images[leftImage] == *images[rightImage];
 							images.push_back(new Image(img));
 						}
-						if(ImGui::Button("operator!="))
+						if(ImGui::Button("operator != IMG "))
 						{
 							Image img = *images[leftImage] != *images[rightImage];
 							images.push_back(new Image(img));
