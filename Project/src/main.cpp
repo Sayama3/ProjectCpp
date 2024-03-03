@@ -14,12 +14,15 @@
 #include <imgui_impl_glfw.h>
 
 #include <GLFW/glfw3.h>
+#include <portable-file-dialogs.h>
+#include <stb_image_write.h>
+
+#include "Image.hpp"
+
 #include <cstdio>
 #include <cstring>
 #include <cmath>
-#include "Image.hpp"
-#include "portable-file-dialogs.h"
-#include "stb_image_write.h"
+#include <algorithm>
 #include <unordered_map>
 
 // This example can also compile and run with Emscripten! See 'Makefile.emscripten' for details.
