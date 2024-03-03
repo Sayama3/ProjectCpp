@@ -416,24 +416,27 @@ void Image::UpdateOpenGLTexture()
 	{
 		//TODO: recreate the image following the display mode.
 		GLenum dataFormat = 0;
-		if(m_Channels == 4) { dataFormat = GL_RGBA; }
-		else if(m_Channels == 3) { dataFormat = GL_RGB; }
-		else if(m_Channels == 2) { dataFormat = GL_RG; }
-		else if(m_Channels == 1) { dataFormat = GL_RED; }
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		//glTextureSubImage2D(m_RenderId.value(), 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE,m_Image.data());
 		//return;
         if(m_ImageType==ModelType::Gray) {
 			auto newImg(*this);
 			newImg.ConvertImageToModelType(ModelType::RGB);
+
 			if(newImg.m_Channels == 4) { dataFormat = GL_RGBA; }
 			else if(newImg.m_Channels == 3) { dataFormat = GL_RGB; }
 			else if(newImg.m_Channels == 2) { dataFormat = GL_RG; }
 			else if(newImg.m_Channels == 1) { dataFormat = GL_RED; }
+
             glTextureSubImage2D(m_RenderId.value(), 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE,newImg.m_Image.data());
         }
         else
 		{
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			if(m_Channels == 4) { dataFormat = GL_RGBA; }
+			else if(m_Channels == 3) { dataFormat = GL_RGB; }
+			else if(m_Channels == 2) { dataFormat = GL_RG; }
+			else if(m_Channels == 1) { dataFormat = GL_RED; }
+
 			glTextureSubImage2D(m_RenderId.value(), 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, m_Image.data());
 		}
 	}
