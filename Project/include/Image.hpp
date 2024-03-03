@@ -119,6 +119,7 @@ public:
 	void SetImageType(ModelType imageType);
     void ConvertImageToModelType(ModelType imageType);
     [[nodiscard]] inline float GetRatio() const {return (float)m_Width / (float)m_Height;}
+	void Resize(uint32_t width, uint32_t height, uint32_t channels);
 
 
 	uint8_t& at(uint32_t x, uint32_t y, uint32_t channel);
@@ -229,6 +230,9 @@ private:
 	[[nodiscard]] uint32_t GetIndex(uint32_t x, uint32_t y) const;
 	[[nodiscard]] uint32_t GetIndex(Vec2UI pos) const;
 	[[nodiscard]] Vec2UI GetPosition(uint32_t index) const;
+	[[nodiscard]] bool IsInside(uint32_t x, uint32_t y) const;
+	[[nodiscard]] bool IsInside(uint32_t x, uint32_t y, uint32_t channel) const;
+
 
 	uint32_t m_Width;
 	uint32_t m_Height;

@@ -32,12 +32,105 @@ struct ImageValueData
 	uint32_t x = 0;
 	uint32_t y = 0;
 	uint32_t channel = 0;
+	ModelType target = ModelType::None;
+	float sizeMultiplier = 1.0f;
 	uint8_t* value = nullptr;
 };
 //const std::string path=R"(D:\Data\Projects\Unity\ProjectCpp\Project\Data\seminaire.png)";
 const std::string path=R"(E:\C++Projects\ProjectCpp\Project\Data\seminaire.png)";
 //greyPix.png)";
 //std::string path=R"(C:\Users\ianpo\Pictures\Iannis_V1_Squared.jpg)";
+
+void UseDockSpace(GLFWwindow* window)
+{
+	// READ THIS !!!
+	// TL;DR; this demo is more complicated than what most users you would normally use.
+	// If we remove all options we are showcasing, this demo would become:
+	//     void ShowExampleAppDockSpace()
+	//     {
+	//         ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+	//     }
+	// In most cases you should be able to just call DockSpaceOverViewport() and ignore all the code below!
+	// In this specific demo, we are not using DockSpaceOverViewport() because:
+	// - (1) we allow the host window to be floating/moveable instead of filling the viewport (when opt_fullscreen == false)
+	// - (2) we allow the host window to have padding (when opt_padding == true)
+	// - (3) we expose many flags and need a way to have them visible.
+	// - (4) we have a local menu bar in the host window (vs. you could use BeginMainMenuBar() + DockSpaceOverViewport()
+	//      in your code, but we don't here because we allow the window to be floating)
+
+	const static bool opt_fullscreen = true;
+	const static bool opt_padding = false;
+
+	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+
+	// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
+	// because it would be confusing to have two docking targets within each others.
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+	if (opt_fullscreen)
+	{
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->WorkPos);
+		ImGui::SetNextWindowSize(viewport->WorkSize);
+		ImGui::SetNextWindowViewport(viewport->ID);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+	}
+	else
+	{
+		dockspace_flags &= ~ImGuiDockNodeFlags_PassthruCentralNode;
+	}
+
+	// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
+	// and handle the pass-thru hole, so we ask Begin() to not render a background.
+	if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+		window_flags |= ImGuiWindowFlags_NoBackground;
+
+	// Important: note that we proceed even if Begin() returns false (aka window is collapsed).
+	// This is because we want to keep our DockSpace() active. If a DockSpace() is inactive,
+	// all active windows docked into it will lose their parent and become undocked.
+	// We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
+	// any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
+	if (!opt_padding)
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+	ImGui::Begin("DockSpace", nullptr, window_flags);
+	if (!opt_padding)
+		ImGui::PopStyleVar();
+
+	if (opt_fullscreen)
+		ImGui::PopStyleVar(2);
+
+	// Submit the DockSpace
+	ImGuiIO& io = ImGui::GetIO();
+	if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+	{
+		ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+	}
+
+
+	if (ImGui::BeginMenuBar())
+	{
+		if (ImGui::BeginMenu("Options"))
+		{
+			// Disabling fullscreen would allow the window to be moved to the front of other windows,
+			// which we can't undo at the moment without finer window depth/z control.
+			if(ImGui::MenuItem("Exit"))
+			{
+				glfwSetWindowShouldClose(window, true);
+			}
+//			ImGui::MenuItem("Padding", NULL, &opt_padding);
+			ImGui::Separator();
+
+			ImGui::EndMenu();
+		}
+
+		ImGui::EndMenuBar();
+	}
+
+	ImGui::End();
+}
 
 // Main code
 int main(int, char**)
@@ -140,8 +233,10 @@ int main(int, char**)
 		ImGui::NewFrame();
 
 		// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-		if (show_demo_window)
-			ImGui::ShowDemoWindow(&show_demo_window);
+//		if (show_demo_window)
+//			ImGui::ShowDemoWindow(&show_demo_window);
+
+		UseDockSpace(window);
 
 		{
 			ImGui::Begin("Image Creator");
@@ -209,6 +304,7 @@ int main(int, char**)
 						std::string currentImage = "Image " + std::to_string(indexImage);
 						if (ImGui::BeginCombo("Image", currentImage.c_str())) {
 							for (int i = 0; i < images.size(); i++) {
+								if(images[i] == nullptr) continue;
 								const bool is_selected = (indexImage == i);
 								std::string iImage = "Image " + std::to_string(i);
 								if (ImGui::Selectable(iImage.c_str(), is_selected)) {
@@ -221,12 +317,14 @@ int main(int, char**)
 							ImGui::EndCombo();
 						}
 
+						ImGui::BeginDisabled(images[indexImage] == nullptr);
 						if(ImGui::Button("Duplicate"))
 						{
 							images.push_back(new Image(*images[indexImage]));
 						}
 						ImGui::EndDisabled();
 					}
+					ImGui::EndDisabled();
 				}
 
 				if (ImGui::CollapsingHeader("Assign Image to another one"))
@@ -238,6 +336,7 @@ int main(int, char**)
 						std::string currentSourceImage = "Image " + std::to_string(sourceImage);
 						if (ImGui::BeginCombo("Source Image", currentSourceImage.c_str())) {
 							for (int i = 0; i < images.size(); i++) {
+								if(images[i] == nullptr) continue;
 								const bool is_selected = (sourceImage == i);
 								std::string iImage = "Image " + std::to_string(i);
 								if (ImGui::Selectable(iImage.c_str(), is_selected)) {
@@ -255,6 +354,7 @@ int main(int, char**)
 						std::string currentTargetImage = "Image " + std::to_string(targetImage);
 						if (ImGui::BeginCombo("Target Image", currentTargetImage.c_str())) {
 							for (int i = 0; i < images.size(); i++) {
+								if(images[i] == nullptr) continue;
 								const bool is_selected = (targetImage == i);
 								std::string iImage = "Image " + std::to_string(i);
 								if (ImGui::Selectable(iImage.c_str(), is_selected)) {
@@ -267,14 +367,14 @@ int main(int, char**)
 							ImGui::EndCombo();
 						}
 
-						ImGui::BeginDisabled(targetImage == sourceImage);
+						ImGui::BeginDisabled(images[targetImage] == nullptr || images[sourceImage] == nullptr || targetImage == sourceImage);
 						if(ImGui::Button("Assign"))
 						{
 							images[targetImage] = images[sourceImage];
 						}
 						ImGui::EndDisabled();
-						ImGui::EndDisabled();
 					}
+					ImGui::EndDisabled();
 				}
 
 				if(ImGui::CollapsingHeader("Operators"))
@@ -286,6 +386,7 @@ int main(int, char**)
 						std::string currentSourceImage = "Image " + std::to_string(leftImage);
 						if (ImGui::BeginCombo("Left Image", currentSourceImage.c_str())) {
 							for (int i = 0; i < images.size(); i++) {
+								if(images[i] == nullptr) continue;
 								const bool is_selected = (leftImage == i);
 								std::string iImage = "Image " + std::to_string(i);
 								if (ImGui::Selectable(iImage.c_str(), is_selected)) {
@@ -303,6 +404,7 @@ int main(int, char**)
 						std::string currentTargetImage = "Image " + std::to_string(rightImage);
 						if (ImGui::BeginCombo("Right Image", currentTargetImage.c_str())) {
 							for (int i = 0; i < images.size(); i++) {
+								if(images[i] == nullptr) continue;
 								const bool is_selected = (rightImage == i);
 								std::string iImage = "Image " + std::to_string(i);
 								if (ImGui::Selectable(iImage.c_str(), is_selected)) {
@@ -338,13 +440,13 @@ int main(int, char**)
 							int index = 0;
 							for (auto it = operatorPixels.begin(); it != operatorPixels.end();)
 							{
+								ImGui::PushID(&*it);
 								std::string label = std::to_string(index);
 								ImGui::Text("%s :", label.c_str());
 								ImGui::SameLine();
-								std::string name("##ValueForVector_");
-								name += std::to_string(index);
-								ImGui::DragScalar(name.c_str(), ImGuiDataType_U8, &*it, 1, nullptr, nullptr, "%d");
+								ImGui::DragScalar("", ImGuiDataType_U8, &*it, 1, nullptr, nullptr, "%d");
 								ImGui::SameLine();
+
 								if(ImGui::Button("-"))
 								{
 									it = operatorPixels.erase(it);
@@ -354,131 +456,120 @@ int main(int, char**)
 									++it;
 									++index;
 								}
+								ImGui::PopID();
 							}
 						}
 
 						ImGui::Separator();
 
-
-						if(ImGui::Button("operator+ (Image lft, const Image& rht)"))
+						ImGui::BeginDisabled(images[leftImage] == nullptr);
 						{
-							Image img = *images[leftImage] +  *images[rightImage];
-							images.push_back(new Image(img));
-						}
-						if(ImGui::Button("operator+ (Image lft, const uint8_t rht);"))
-						{
-							Image img = *images[leftImage] +  operatorChannel;
-							images.push_back(new Image(img));
-						}
-						if(ImGui::Button("operator+ (Image lft, const std::vector<uint8_t>& rht);"))
-						{
-							Image img = *images[leftImage] +  *images[rightImage];
-							images.push_back(new Image(img));
-						}
-						if(ImGui::Button("operator- (Image lft, const Image& rht);"))
-						{
-							Image img = *images[leftImage] -  *images[rightImage];
-							images.push_back(new Image(img));
-						}
-						if(ImGui::Button("operator- (Image lft, const uint8_t rht);"))
-						{
-							Image img = *images[leftImage] -  operatorChannel;
-							images.push_back(new Image(img));
-						}
-						if(ImGui::Button("operator- (Image lft, const std::vector<uint8_t>& rht);"))
-						{
-							Image img = *images[leftImage] -  *images[rightImage];
-							images.push_back(new Image(img));
-						}
-						if(ImGui::Button("operator^ (Image lft, const Image& rht);"))
-						{
-							Image img = *images[leftImage] ^  *images[rightImage];
-							images.push_back(new Image(img));
-						}
-						if(ImGui::Button("operator^ (Image lft, const uint8_t rht);"))
-						{
-							Image img = *images[leftImage] ^  operatorChannel;
-							images.push_back(new Image(img));
-						}
-						if(ImGui::Button("operator^ (Image lft, const std::vector<uint8_t>& rht);"))
-						{
-							Image img = *images[leftImage] ^  *images[rightImage];
-							images.push_back(new Image(img));
-						}
-						if(ImGui::Button("operator* (Image lft, float rht);"))
-						{
-							Image img = *images[leftImage] *  operatorReal;
-							images.push_back(new Image(img));
-						}
-						if(ImGui::Button("operator/ (Image lft, float rht);"))
-						{
-							Image img = *images[leftImage] /  operatorReal;
-							images.push_back(new Image(img));
-						}
-                        if(ImGui::Button("operator< "))
-                        {
-                            Image img = *images[leftImage] < (uint8_t) operatorInt;
-                            images.push_back(new Image(img));
-                        }if(ImGui::Button("operator<="))
-                        {
-                            Image img = *images[leftImage] <= (uint8_t) operatorInt;
-                            images.push_back(new Image(img));
-                        }
-                        if(ImGui::Button("operator> "))
-                        {
-                            Image img = *images[leftImage] >  (uint8_t) operatorInt;
-                            images.push_back(new Image(img));
-                        }
-                        if(ImGui::Button("operator>="))
-                        {
-                            Image img = *images[leftImage] >= (uint8_t) operatorInt;
-                            images.push_back(new Image(img));
-                        }
-                        if(ImGui::Button("operator=="))
-                        {
-                            Image img = *images[leftImage] == (uint8_t) operatorInt;
-                            images.push_back(new Image(img));
-                        }
-                        if(ImGui::Button("operator!="))
-                        {
-                            Image img = *images[leftImage] != (uint8_t) operatorInt;
-                            images.push_back(new Image(img));
-                        }
-                        ImGui::Text("With images, experimental");
-                        if(ImGui::Button("operator < IMG "))
-						{
-							Image img = *images[leftImage] <  *images[rightImage];
-							images.push_back(new Image(img));
-						}
-						if(ImGui::Button("operator <= IMG "))
-						{
-							Image img = *images[leftImage] <= *images[rightImage];
-							images.push_back(new Image(img));
-						}
-						if(ImGui::Button("operator > IMG  "))
-						{
-							Image img = *images[leftImage] >  *images[rightImage];
-							images.push_back(new Image(img));
-						}
-						if(ImGui::Button("operator >= IMG "))
-						{
-							Image img = *images[leftImage] >= *images[rightImage];
-							images.push_back(new Image(img));
-						}
-						if(ImGui::Button("operator == IMG "))
-						{
-							Image img = *images[leftImage] == *images[rightImage];
-							images.push_back(new Image(img));
-						}
-						if(ImGui::Button("operator != IMG "))
-						{
-							Image img = *images[leftImage] != *images[rightImage];
-							images.push_back(new Image(img));
-						}
-						if(ImGui::Button("operator~ "))
-						{
-							Image img = ~*images[leftImage];
-							images.push_back(new Image(img));
+							ImGui::BeginDisabled(images[rightImage] == nullptr);
+							if (ImGui::Button("operator+ (Image lft, const Image& rht)")) {
+								Image img = *images[leftImage] + *images[rightImage];
+								images.push_back(new Image(img));
+							}
+							ImGui::EndDisabled();//images[rightImage] == nullptr
+							if (ImGui::Button("operator+ (Image lft, const uint8_t rht);")) {
+								Image img = *images[leftImage] + operatorChannel;
+								images.push_back(new Image(img));
+							}
+							if (ImGui::Button("operator+ (Image lft, const std::vector<uint8_t>& rht);")) {
+								Image img = *images[leftImage] + operatorPixels;
+								images.push_back(new Image(img));
+							}
+							ImGui::BeginDisabled(images[rightImage] == nullptr);
+							if (ImGui::Button("operator- (Image lft, const Image& rht);")) {
+								Image img = *images[leftImage] - *images[rightImage];
+								images.push_back(new Image(img));
+							}
+							ImGui::EndDisabled();//images[rightImage] == nullptr
+							if (ImGui::Button("operator- (Image lft, const uint8_t rht);")) {
+								Image img = *images[leftImage] - operatorChannel;
+								images.push_back(new Image(img));
+							}
+							if (ImGui::Button("operator- (Image lft, const std::vector<uint8_t>& rht);")) {
+								Image img = *images[leftImage] - operatorPixels;
+								images.push_back(new Image(img));
+							}
+							ImGui::BeginDisabled(images[rightImage] == nullptr);
+							if (ImGui::Button("operator^ (Image lft, const Image& rht);")) {
+								Image img = *images[leftImage] ^ *images[rightImage];
+								images.push_back(new Image(img));
+							}
+							ImGui::EndDisabled();//images[rightImage] == nullptr
+							if (ImGui::Button("operator^ (Image lft, const uint8_t rht);")) {
+								Image img = *images[leftImage] ^ operatorChannel;
+								images.push_back(new Image(img));
+							}
+							if (ImGui::Button("operator^ (Image lft, const std::vector<uint8_t>& rht);")) {
+								Image img = *images[leftImage] ^ operatorPixels;
+								images.push_back(new Image(img));
+							}
+							if (ImGui::Button("operator* (Image lft, float rht);")) {
+								Image img = *images[leftImage] * operatorReal;
+								images.push_back(new Image(img));
+							}
+							if (ImGui::Button("operator/ (Image lft, float rht);")) {
+								Image img = *images[leftImage] / operatorReal;
+								images.push_back(new Image(img));
+							}
+							if (ImGui::Button("operator< ")) {
+								Image img = *images[leftImage] < (uint8_t) operatorInt;
+								images.push_back(new Image(img));
+							}
+							if (ImGui::Button("operator<=")) {
+								Image img = *images[leftImage] <= (uint8_t) operatorInt;
+								images.push_back(new Image(img));
+							}
+							if (ImGui::Button("operator> ")) {
+								Image img = *images[leftImage] > (uint8_t) operatorInt;
+								images.push_back(new Image(img));
+							}
+							if (ImGui::Button("operator>=")) {
+								Image img = *images[leftImage] >= (uint8_t) operatorInt;
+								images.push_back(new Image(img));
+							}
+							if (ImGui::Button("operator==")) {
+								Image img = *images[leftImage] == (uint8_t) operatorInt;
+								images.push_back(new Image(img));
+							}
+							if (ImGui::Button("operator!=")) {
+								Image img = *images[leftImage] != (uint8_t) operatorInt;
+								images.push_back(new Image(img));
+							}
+							ImGui::Text("With images, experimental");
+							ImGui::BeginDisabled(images[rightImage] == nullptr);
+							if (ImGui::Button("operator < IMG ")) {
+								Image img = *images[leftImage] < *images[rightImage];
+								images.push_back(new Image(img));
+							}
+							if (ImGui::Button("operator <= IMG ")) {
+								Image img = *images[leftImage] <= *images[rightImage];
+								images.push_back(new Image(img));
+							}
+							if (ImGui::Button("operator > IMG  ")) {
+								Image img = *images[leftImage] > *images[rightImage];
+								images.push_back(new Image(img));
+							}
+							if (ImGui::Button("operator >= IMG ")) {
+								Image img = *images[leftImage] >= *images[rightImage];
+								images.push_back(new Image(img));
+							}
+							if (ImGui::Button("operator == IMG ")) {
+								Image img = *images[leftImage] == *images[rightImage];
+								images.push_back(new Image(img));
+							}
+							if (ImGui::Button("operator != IMG ")) {
+								Image img = *images[leftImage] != *images[rightImage];
+								images.push_back(new Image(img));
+							}
+							ImGui::EndDisabled();
+							if (ImGui::Button("operator~ ")) {
+								Image img = ~*images[leftImage];
+								images.push_back(new Image(img));
+							}
+							ImGui::EndDisabled();
 						}
 						ImGui::EndDisabled();
 					}
@@ -488,13 +579,13 @@ int main(int, char**)
 			}
 		}
 
-		for (int i = 0; i < images.size(); ++i)
+		for (int index = 0; index < images.size(); ++index)
 		{
-			Image* imagePtr = images[i];
+			Image* imagePtr = images[index];
 			if(imagePtr == nullptr) continue;
 			Image& img = *imagePtr;
 
-			std::string imageName = std::string("Image ").append(std::to_string(i));
+			std::string imageName = std::string("Image ").append(std::to_string(index));
 			bool open = true;
 			ImGuiWindowFlags_ flags = ImGuiWindowFlags_AlwaysVerticalScrollbar;
 			ImGui::Begin(imageName.c_str(), &open, flags);
@@ -520,7 +611,7 @@ int main(int, char**)
 					}
 
 					if (ImGui::BeginCombo("Image Type", imageTypeNames[type].c_str())) {
-						for (int i = 0; i < imageTypeNames.size(); i++) {
+						for (int i = 0; i < imageTypeNames.size(); ++i) {
 							const bool is_selected = (type == i);
 							if (ImGui::Selectable(imageTypeNames[i].c_str(), is_selected)) {
 								type = i;
@@ -534,30 +625,52 @@ int main(int, char**)
 					}
 				}
 
+				if(ImGui::CollapsingHeader("Converter"))
+				{
+
+					if (ImGui::BeginCombo("Conversion Type", imageTypeNames[(int)imagesValues[index].target].c_str())) {
+						for (int i = 0; i < imageTypeNames.size(); ++i) {
+							const bool is_selected = ((int)imagesValues[i].target == i);
+							if (ImGui::Selectable(imageTypeNames[i].c_str(), is_selected)) {
+								imagesValues[index].target = (ModelType)i;
+							}
+
+							// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+							if (is_selected) ImGui::SetItemDefaultFocus();
+						}
+						ImGui::EndCombo();
+					}
+
+					if(ImGui::Button("Convert Image"))
+					{
+						img.ConvertImageToModelType(imagesValues[index].target);
+					}
+				}
+
 				if(ImGui::CollapsingHeader("Image Values")) {
-					ImageValueData& imgValueData = imagesValues[i];
+					ImageValueData& imgValueData = imagesValues[index];
 					ImGui::DragScalar("X", ImGuiDataType_U32, &imgValueData.x, 1, nullptr, nullptr, "%d");
 					ImGui::DragScalar("Y", ImGuiDataType_U32, &imgValueData.y, 1, nullptr, nullptr, "%d");
 					ImGui::DragScalar("Channel", ImGuiDataType_U32, &imgValueData.channel, 1, nullptr, nullptr, "%d");
 
 					if (ImGui::Button("at(x,y,channel)")) {
 						try {
-							imagesValues[i].value = &img.at(imgValueData.x, imgValueData.y, imgValueData.channel);
+							imagesValues[index].value = &img.at(imgValueData.x, imgValueData.y, imgValueData.channel);
 						} catch (std::exception& e) {
 							std::cerr << e.what() << std::endl;
 						}
 					}
 
 					if (ImGui::Button("operator()(x,y,channel)")) {
-						imagesValues[i].value = &img(imgValueData.x, imgValueData.y, imgValueData.channel);
+						imagesValues[index].value = &img(imgValueData.x, imgValueData.y, imgValueData.channel);
 					}
 
 					if (ImGui::Button("Reset Value")) {
-						imagesValues[i].value = nullptr;
+						imagesValues[index].value = nullptr;
 					}
 
-					if (imagesValues.contains(i) && imagesValues[i].value) {
-						if(ImGui::DragScalar("Value", ImGuiDataType_U8, imagesValues[i].value, 1, nullptr, nullptr, "%d"))
+					if (imagesValues.contains(index) && imagesValues[index].value) {
+						if(ImGui::DragScalar("Value", ImGuiDataType_U8, imagesValues[index].value, 1, nullptr, nullptr, "%d"))
 						{
 							img.UpdateOpenGLTexture();
 						}
@@ -566,9 +679,14 @@ int main(int, char**)
 
 				if(ImGui::CollapsingHeader("Image")) {
 					if (img.HasOpenGLTexture()) {
+						ImGui::SliderFloat("Image Size", &imagesValues[index].sizeMultiplier, 0.01f, 1.00f, "%.2f");
 						auto size = ImGui::GetContentRegionAvail();
+						size.x *= imagesValues[index].sizeMultiplier;
+						size.y *= imagesValues[index].sizeMultiplier;
+
 						size.y = size.x / img.GetRatio();
 						ImGui::Image((void *) (intptr_t) img.GetRenderId().value(), size);
+
 						if (ImGui::Button("Delete Texture")) {
 							img.DeleteOpenGLTexture();
 						}
@@ -604,8 +722,8 @@ int main(int, char**)
 			if(!open)
 			{
 				delete imagePtr;
-				images[i] = nullptr;
-				imagesValues[i].value = nullptr;
+				images[index] = nullptr;
+				imagesValues[index].value = nullptr;
 			}
 		}
 

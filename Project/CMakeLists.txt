@@ -14,6 +14,7 @@ set(SRC src/main.cpp
         src/ThirdPartiesImplementor.cpp
         src/Image.cpp
         include/Image.hpp
+        include/array.hpp
 )
 
 add_executable(${EXE_TARGET_NAME} ${SRC})
