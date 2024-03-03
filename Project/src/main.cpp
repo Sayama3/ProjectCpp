@@ -517,7 +517,10 @@ int main(int, char**)
 								Image img = *images[leftImage] / operatorReal;
 								images.push_back(new Image(img));
 							}
-                            ImGui::Text("Boolean ceil as requested");
+
+							ImGui::Separator();
+                            ImGui::PushID("BooleanOperator");
+							ImGui::Text("Boolean ceil as requested");
                             if (ImGui::Button("operator< ")) {
 								Image img = *images[leftImage] < operatorChannel;
 								images.push_back(new Image(img));
@@ -542,6 +545,10 @@ int main(int, char**)
 								Image img = *images[leftImage] != operatorChannel;
 								images.push_back(new Image(img));
 							}
+							ImGui::PopID();
+
+							ImGui::Separator();
+							ImGui::PushID("PixelOperator");
                             ImGui::Text("Pixel value ceil, bonus");
                             if (ImGui::Button("operator< ")) {
                                 Image img = images[leftImage]->lt(operatorChannel);
@@ -567,6 +574,7 @@ int main(int, char**)
                                 Image img = images[leftImage]->ne(operatorChannel);
                                 images.push_back(new Image(img));
                             }
+							ImGui::PopID();
 							/*ImGui::Text("With images, experimental");
 							ImGui::BeginDisabled(images[rightImage] == nullptr);
 							if (ImGui::Button("operator < IMG ")) {

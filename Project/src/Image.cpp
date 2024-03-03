@@ -378,7 +378,7 @@ void Image::CreateOpenGLTexture()
 	uint32_t rendererID;
 //    auto ch = std::max(ImageHelper::GetModelTypeChannelCount(m_ImageType), (uint32_t)3);
 	auto ch = m_Channels;
-	if(m_ImageType == ModelType::Gray) ch = 3;
+	if(m_ImageType == ModelType::Gray && m_Channels != 0) ch = 3;
 	if(ch == 4) { internalFormat = GL_RGBA8; dataFormat = GL_RGBA; }
 	else if(ch == 3) { internalFormat = GL_RGB8; dataFormat = GL_RGB; }
 	else if(ch == 2) { internalFormat = GL_RG8; dataFormat = GL_RG; }
@@ -419,7 +419,7 @@ void Image::UpdateOpenGLTexture()
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		//glTextureSubImage2D(m_RenderId.value(), 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE,m_Image.data());
 		//return;
-        if(m_ImageType==ModelType::Gray) {
+        if(m_ImageType==ModelType::Gray && m_Channels != 0) {
 			auto newImg(*this);
 			newImg.ConvertImageToModelType(ModelType::RGB);
 
@@ -624,7 +624,7 @@ Image Image::lt(uint8_t ceil) const {
             int av=0;
             for (int c = 0; c < cha; ++c) {
                 uint8_t val;
-                val = (x, y, c);
+                val = this->operator()(x, y, c);
                 if(val>ceil){
                     pass=false;
                     break;
