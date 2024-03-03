@@ -309,6 +309,7 @@ void Image::ConvertImageToModelType(ModelType imageType){
 void Image::SetImageType(ModelType imageType)
 {
 	m_ImageType = imageType;
+	UpdateImage();
 }
 
 void Image::UpdateImage()
@@ -373,6 +374,7 @@ void Image::CreateOpenGLTexture()
 	uint32_t rendererID;
 //    auto ch = std::max(ImageHelper::GetModelTypeChannelCount(m_ImageType), (uint32_t)3);
 	auto ch = m_Channels;
+	if(m_ImageType == ModelType::Gray) ch = 3;
 	if(ch == 4) { internalFormat = GL_RGBA8; dataFormat = GL_RGBA; }
 	else if(ch == 3) { internalFormat = GL_RGB8; dataFormat = GL_RGB; }
 	else if(ch == 2) { internalFormat = GL_RG8; dataFormat = GL_RG; }
@@ -416,29 +418,16 @@ void Image::UpdateOpenGLTexture()
 		else if(m_Channels == 1) { dataFormat = GL_RED; }
 		//glTextureSubImage2D(m_RenderId.value(), 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE,m_Image.data());
 		//return;
-		/*
-        if(m_ImageType!=ModelType::RGB && m_ImageType!=ModelType::RGBA) {
-            Image newImg(*this);
-            switch (m_ImageType) {
-
-                case ModelType::Gray:
-                case ModelType::HSL :
-                    newImg.ConvertImageToModelType(ModelType::RGB);
-                case ModelType::RGB:
-                    dataFormat = GL_RGB;
-                    break;
-                case ModelType::HSLA:
-                case ModelType::ARGB:
-                    newImg.ConvertImageToModelType(ModelType::RGBA);
-                case ModelType::RGBA:
-                    dataFormat = GL_RGBA;
-                    break;
-            }
+        if(m_ImageType==ModelType::Gray) {
+			auto newImg(*this);
+			newImg.ConvertImageToModelType(ModelType::RGB);
+			if(newImg.m_Channels == 4) { dataFormat = GL_RGBA; }
+			else if(newImg.m_Channels == 3) { dataFormat = GL_RGB; }
+			else if(newImg.m_Channels == 2) { dataFormat = GL_RG; }
+			else if(newImg.m_Channels == 1) { dataFormat = GL_RED; }
             glTextureSubImage2D(m_RenderId.value(), 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE,newImg.m_Image.data());
         }
         else
-        */
-
 		{
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 			glTextureSubImage2D(m_RenderId.value(), 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, m_Image.data());
