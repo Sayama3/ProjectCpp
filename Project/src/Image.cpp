@@ -212,23 +212,25 @@ void Image::ConvertImageToModelType(ModelType imageType){
 			switch(imageType){
 				case ModelType::RGB:
 					conv = [](std::vector<uint8_t> in) {
-						uint8_t s = 0;
+						int32_t s = 0;
 						for(uint8_t i : in)s+=i;
+						s /= in.size();
 						in.clear();
-						in.push_back(s);
-						in.push_back(s);
-						in.push_back(s);
+						in.push_back(std::clamp(s,0,255));
+						in.push_back(std::clamp(s,0,255));
+						in.push_back(std::clamp(s,0,255));
 						return in;
 					};
 					break;
 				case ModelType::RGBA:
 					conv = [](std::vector<uint8_t> in) {
-						uint8_t s = 0;
+						int32_t s = 0;
 						for(uint8_t i : in)s+=i;
+						s /= in.size();
 						in.clear();
-						in.push_back(s);
-						in.push_back(s);
-						in.push_back(s);
+						in.push_back(std::clamp(s,0,255));
+						in.push_back(std::clamp(s,0,255));
+						in.push_back(std::clamp(s,0,255));
 						in.push_back(255);
 						return in;
 					};
@@ -238,12 +240,13 @@ void Image::ConvertImageToModelType(ModelType imageType){
 		case ModelType::RGB:
 			if(imageType==ModelType::Gray){
 				conv = [](std::vector<uint8_t> in) {
-					uint8_t s=0;
+					int32_t s=0;
 					for (auto v : in) {
 						s+=v;
 					}
+					s/= in.size();
 					in.clear();
-					in.push_back(s);
+					in.push_back(std::clamp(s,0,255));
 					return in;
 				};
 			};
@@ -261,12 +264,13 @@ void Image::ConvertImageToModelType(ModelType imageType){
 			}
 			if(imageType==ModelType::Gray){
 				conv = [](std::vector<uint8_t> in) {
-					uint8_t s=0;
+					int32_t s=0;
 					for (auto v : in) {
 						s+=v;
 					}
+					s /= in.size();
 					in.clear();
-					in.push_back(s);
+					in.push_back(std::clamp(s,0,255));
 					return in;
 				};
 			}
