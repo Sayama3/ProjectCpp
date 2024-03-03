@@ -128,8 +128,33 @@ public:
 	uint8_t& operator() (uint32_t x, uint32_t y, uint32_t channel);
 	const uint8_t& operator() (uint32_t x, uint32_t y, uint32_t channel) const;
 
+    //<
+
+    [[nodiscard]] Image lt (uint8_t ceil) const;
+    //>=
+    [[nodiscard]] Image ge(uint8_t ceil) const{return ~(~this->lt(Invert(ceil)));}
+    //<=
+    [[nodiscard]] Image le(uint8_t ceil) const{
+        //Ceiling an image with <= over < doesn't make a lot of sense we are not treating boolean values, it means that we also include i.e don't put equal to the ceil value that are already equal to the ceil
+        //But in order to have operator with different behaviour we consider ceil+1 cause we dealing with int values
+        return this->lt(ceil+1);
+    }
+    //>
+    [[nodiscard]] Image gt (uint8_t ceil) const{
+        //Same for > using >= which uses directly <
+        return this->ge(ceil+1);
+    }
+    //==
+    [[nodiscard]] Image eq(uint8_t ceil) const{return (this->ge(ceil)).le(ceil);}
+    //!=
+    [[nodiscard]] Image ne(uint8_t ceil) const{
+        //With current logic of setting each value "outside" of the ceil to the ceil, != with a uint8 value returns same picture even if we'd compose it using other operators
+        return *this;
+    }
+
     Image& set(uint32_t x, uint32_t y, uint32_t channel,int32_t val);
     Image& add(uint32_t x, uint32_t y, uint32_t channel, int16_t val);
+
 
         void CreateOpenGLTexture();
 	void DeleteOpenGLTexture();
@@ -204,21 +229,17 @@ public:
     }
     //Ceil with value
     friend Image operator< (Image im,uint8_t ceil);
-    friend Image operator>=(Image lft, uint8_t ceil) {return ~(~lft<Invert(ceil));}
+    friend Image operator>=(Image lft, uint8_t ceil) {return ~(lft<ceil);}
     friend Image operator<=(Image lft, uint8_t ceil) {
-        //Ceiling an image with <= over < doesn't make a lot of sense we are not treating boolean values, it means that we also include i.e don't put equal to the ceil value that are already equal to the ceil
-        //But in order to have operator with different behaviour we consider ceil+1 cause we dealing with int values
         return lft<ceil+1;
     }
     friend Image operator> (Image lft, uint8_t ceil) {
-        //Same for > using >= which uses directly <
-        return lft>=ceil+1;
+        return ~(lft<=ceil);
     }
-    friend Image operator==(Image lft, uint8_t ceil) {return (lft>=ceil)<=ceil;}
-    friend Image operator!=(Image lft, uint8_t ceil) {
-        //With current logic of setting each value "outside" of the ceil to the ceil, != with a uint8 value returns same picture even if we'd compose it using other operators
-        return lft;
-    }
+    //Will act as boolean || because we're deealing with "boolean" images
+    friend Image operator!=(Image lft, uint8_t ceil) { return (lft<ceil)+(lft>ceil);}
+    friend Image operator==(Image lft, uint8_t ceil) {return ~(lft!=ceil);}
+
 
 
 

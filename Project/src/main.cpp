@@ -36,8 +36,8 @@ struct ImageValueData
 	float sizeMultiplier = 1.0f;
 	uint8_t* value = nullptr;
 };
-//const std::string path=R"(D:\Data\Projects\Unity\ProjectCpp\Project\Data\seminaire.png)";
-const std::string path=R"(E:\C++Projects\ProjectCpp\Project\Data\seminaire.png)";
+const std::string path=R"(D:\Data\Projects\Unity\ProjectCpp\Project\Data\seminaire.png)";
+//const std::string path=R"(E:\C++Projects\ProjectCpp\Project\Data\seminaire.png)";
 //greyPix.png)";
 //std::string path=R"(C:\Users\ianpo\Pictures\Iannis_V1_Squared.jpg)";
 
@@ -511,7 +511,8 @@ int main(int, char**)
 								Image img = *images[leftImage] / operatorReal;
 								images.push_back(new Image(img));
 							}
-							if (ImGui::Button("operator< ")) {
+                            ImGui::Text("Boolean ceil as requested");
+                            if (ImGui::Button("operator< ")) {
 								Image img = *images[leftImage] < operatorChannel;
 								images.push_back(new Image(img));
 							}
@@ -535,7 +536,32 @@ int main(int, char**)
 								Image img = *images[leftImage] != operatorChannel;
 								images.push_back(new Image(img));
 							}
-							ImGui::Text("With images, experimental");
+                            ImGui::Text("Pixel value ceil, bonus");
+                            if (ImGui::Button("operator< ")) {
+                                Image img = images[leftImage]->lt(operatorChannel);
+                                images.push_back(new Image(img));
+                            }
+                            if (ImGui::Button("operator<=")) {
+                                Image img = images[leftImage]->le(operatorChannel);
+                                images.push_back(new Image(img));
+                            }
+                            if (ImGui::Button("operator> ")) {
+                                Image img = images[leftImage]->gt(operatorChannel);
+                                images.push_back(new Image(img));
+                            }
+                            if (ImGui::Button("operator>=")) {
+                                Image img = images[leftImage]->ge(operatorChannel);
+                                images.push_back(new Image(img));
+                            }
+                            if (ImGui::Button("operator==")) {
+                                Image img = images[leftImage]->eq(operatorChannel);
+                                images.push_back(new Image(img));
+                            }
+                            if (ImGui::Button("operator!=")) {
+                                Image img = images[leftImage]->ne(operatorChannel);
+                                images.push_back(new Image(img));
+                            }
+							/*ImGui::Text("With images, experimental");
 							ImGui::BeginDisabled(images[rightImage] == nullptr);
 							if (ImGui::Button("operator < IMG ")) {
 								Image img = *images[leftImage] < *images[rightImage];
@@ -562,6 +588,7 @@ int main(int, char**)
 								images.push_back(new Image(img));
 							}
 							ImGui::EndDisabled();
+							 */
 							if (ImGui::Button("operator~ ")) {
 								Image img = ~*images[leftImage];
 								images.push_back(new Image(img));
