@@ -15,6 +15,8 @@
 
 #include <GLFW/glfw3.h>
 #include <cstdio>
+#include <cstring>
+#include <cmath>
 #include "Image.hpp"
 #include "portable-file-dialogs.h"
 #include "stb_image_write.h"
@@ -332,7 +334,8 @@ int main(int, char**)
 					ImGui::BeginDisabled(images.size() < 1);
 					{
 						static uint64_t sourceImage = 0;
-						sourceImage = std::min(sourceImage, images.size() - 1);
+						sourceImage = std::min(sourceImage, (uint64_t)images.size() - 1);
+						sourceImage = std::min(sourceImage, (uint64_t)images.size() - 1);
 						std::string currentSourceImage = "Image " + std::to_string(sourceImage);
 						if (ImGui::BeginCombo("Source Image", currentSourceImage.c_str())) {
 							for (int i = 0; i < images.size(); i++) {
@@ -350,7 +353,7 @@ int main(int, char**)
 						}
 
 						static uint64_t targetImage = 0;
-						targetImage = std::min(targetImage, images.size() - 1);
+						targetImage = std::min(targetImage, (uint64_t)images.size() - 1);
 						std::string currentTargetImage = "Image " + std::to_string(targetImage);
 						if (ImGui::BeginCombo("Target Image", currentTargetImage.c_str())) {
 							for (int i = 0; i < images.size(); i++) {
@@ -382,7 +385,7 @@ int main(int, char**)
 					ImGui::BeginDisabled(images.empty());
 					{
 						static uint64_t leftImage = 0;
-						leftImage = std::min(leftImage, images.size() - 1);
+						leftImage = std::min(leftImage, (uint64_t)images.size() - 1);
 						std::string currentSourceImage = "Image " + std::to_string(leftImage);
 						if (ImGui::BeginCombo("Left Image", currentSourceImage.c_str())) {
 							for (int i = 0; i < images.size(); i++) {
@@ -400,7 +403,7 @@ int main(int, char**)
 						}
 
 						static uint64_t rightImage = 0;
-						rightImage = std::min(rightImage, images.size() - 1);
+						rightImage = std::min(rightImage, (uint64_t)images.size() - 1);
 						std::string currentTargetImage = "Image " + std::to_string(rightImage);
 						if (ImGui::BeginCombo("Right Image", currentTargetImage.c_str())) {
 							for (int i = 0; i < images.size(); i++) {

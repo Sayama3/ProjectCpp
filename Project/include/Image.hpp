@@ -4,12 +4,14 @@
 
 #pragma once
 
-#include <cmath>
-#include <cstdint>
+#include <algorithm>
 #include <vector>
 #include <ostream>
 #include <optional>
 #include <filesystem>
+#include <cmath>
+#include <cstring>
+#include <cstdint>
 
 struct Vec2UI
 {
