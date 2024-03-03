@@ -305,7 +305,7 @@ int main(int, char**)
 					ImGui::BeginDisabled(images.empty());
 					{
 						static uint64_t indexImage = 0;
-						indexImage = std::min(indexImage, images.size() - 1);
+						indexImage = std::min(indexImage, (uint64_t)images.size() - 1);
 						std::string currentImage = "Image " + std::to_string(indexImage);
 						if (ImGui::BeginCombo("Image", currentImage.c_str())) {
 							for (int i = 0; i < images.size(); i++) {
