@@ -423,9 +423,6 @@ int main(int, char**)
 						static float operatorReal = 0;
 						ImGui::DragFloat("Real Value", &operatorReal, 0.005);
 
-                        static int operatorInt = 200;
-                        ImGui::DragInt("Integer Value", &operatorInt, 1,0,255);
-
 						static std::vector<uint8_t> operatorPixels = {};
 						if(ImGui::CollapsingHeader("pixels"))
 						{
@@ -515,27 +512,27 @@ int main(int, char**)
 								images.push_back(new Image(img));
 							}
 							if (ImGui::Button("operator< ")) {
-								Image img = *images[leftImage] < (uint8_t) operatorInt;
+								Image img = *images[leftImage] < operatorChannel;
 								images.push_back(new Image(img));
 							}
 							if (ImGui::Button("operator<=")) {
-								Image img = *images[leftImage] <= (uint8_t) operatorInt;
+								Image img = *images[leftImage] <= operatorChannel;
 								images.push_back(new Image(img));
 							}
 							if (ImGui::Button("operator> ")) {
-								Image img = *images[leftImage] > (uint8_t) operatorInt;
+								Image img = *images[leftImage] > operatorChannel;
 								images.push_back(new Image(img));
 							}
 							if (ImGui::Button("operator>=")) {
-								Image img = *images[leftImage] >= (uint8_t) operatorInt;
+								Image img = *images[leftImage] >= operatorChannel;
 								images.push_back(new Image(img));
 							}
 							if (ImGui::Button("operator==")) {
-								Image img = *images[leftImage] == (uint8_t) operatorInt;
+								Image img = *images[leftImage] == operatorChannel;
 								images.push_back(new Image(img));
 							}
 							if (ImGui::Button("operator!=")) {
-								Image img = *images[leftImage] != (uint8_t) operatorInt;
+								Image img = *images[leftImage] != operatorChannel;
 								images.push_back(new Image(img));
 							}
 							ImGui::Text("With images, experimental");

@@ -533,7 +533,14 @@ Image &Image::operator-=(const Image &rht) {
 }
 
 Image &Image::operator-=(const uint8_t rht) {
-	return *this+=-rht;
+	for (int x = 0; x < m_Width; ++x) {
+		for (int y = 0; y < m_Height; ++y) {
+			for (int c = 0; c < m_Channels; ++c) {
+				this->add(x,y,c,-(int16_t)rht);
+			}
+		}
+	}
+	return *this;
 }
 
 Image &Image::operator-=(const std::vector<uint8_t> &rht) {
@@ -579,7 +586,7 @@ Image &Image::operator^=(const uint8_t rht) {
 	for (int x = 0; x < m_Width; ++x) {
 		for (int y = 0; y < m_Height; ++y) {
 			for (int c = 0; c < m_Channels; ++c) {
-				this->at(x,y,c)=std::abs(this->at(x,y,c)-rht);
+				this->at(x,y,c)=std::abs((int16_t)this->at(x,y,c)-(int16_t)rht);
 			}
 		}
 	}
