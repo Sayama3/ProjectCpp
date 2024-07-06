@@ -14,7 +14,17 @@ set(SRC src/main.cpp
         src/ThirdPartiesImplementor.cpp
         src/Image.cpp
         include/Image.hpp
-        include/array.hpp
+        include/Core/array.hpp
+        src/OpenGL/Texture.cpp
+        include/OpenGL/Texture.hpp
+        src/Core/Buffer.cpp
+        include/Core/Buffer.hpp
+        src/Core/Logger.cpp
+        include/Core/Logger.hpp
+        include/Core/Profiler.hpp
+        include/Core/Macro.hpp
+        include/Core/Optional.hpp
+        include/OpenGL/TextureSpecification.hpp
 )
 
 add_executable(${EXE_TARGET_NAME} ${SRC})
@@ -29,6 +39,9 @@ elseif(CMAKE_BUILD_TYPE MATCHES "[Rr][Ee][Ll][Ee][Aa][Ss][Ee]")
 elseif(CMAKE_BUILD_TYPE MATCHES "[Dd][Ii][Ss][Tt]")
     target_compile_definitions(${EXE_TARGET_NAME} PUBLIC PC_DIST)
 endif()
+target_compile_definitions(${EXE_TARGET_NAME} PUBLIC PC_USE_ASSERT)
+target_compile_definitions(${EXE_TARGET_NAME} PUBLIC PC_LOG)
+target_compile_definitions(${EXE_TARGET_NAME} PUBLIC PC_PROFILING)
 
 target_compile_features(${EXE_TARGET_NAME} PUBLIC cxx_std_20)
 

@@ -17,19 +17,23 @@
 #include <portable-file-dialogs.h>
 #include <stb_image_write.h>
 
-#include "Image.hpp"
-
 #include <cstdio>
 #include <cstring>
 #include <cmath>
 #include <algorithm>
 #include <unordered_map>
 
+#include "Image.hpp"
+#include "Core/Macro.hpp"
+#include "Core/Logger.hpp"
+#include "Core/Profiler.hpp"
+#include "OpenGL/Texture.hpp"
+
 // This example can also compile and run with Emscripten! See 'Makefile.emscripten' for details.
 
 static void glfw_error_callback(int error, const char* description)
 {
-	fprintf(stderr, "GLFW Error %d: %s\n", error, description);
+	PC_ERROR("GLFW Error {}: {}", error, description);
 }
 
 struct ImageValueData
@@ -140,6 +144,8 @@ void UseDockSpace(GLFWwindow* window)
 // Main code
 int main(int, char**)
 {
+	Log::Init();
+
 	glfwSetErrorCallback(glfw_error_callback);
 	if (!glfwInit())
 		return 1;
@@ -218,13 +224,16 @@ int main(int, char**)
 
 	std::vector<std::string> imageTypeNames = ImageHelper::GetImageTypeNames();
 	std::unordered_map<uint64_t, ImageValueData> imagesValues;
+	std::unordered_map<uint64_t, Texture> imagesTexture;
 	std::vector<Image*> images;
-    Image* im=new Image(path);
-    images.push_back(im);
-    im->CreateOpenGLTexture();
+
+	Image* im=new Image(path);
+	images.push_back(im);
+	imagesTexture[images.size() - 1] = {im->GetTextureSpec(), im->GetImageBuffer()};
 	// Main loop
 	while (!glfwWindowShouldClose(window))
 	{
+		PC_FRAME_START();
 		// Poll and handle events (inputs, window resize, etc.)
 		// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
 		// - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
@@ -249,9 +258,9 @@ int main(int, char**)
 
 				if (ImGui::CollapsingHeader("Create Default Image")) {
 					if (ImGui::Button("Create")) {
-                        Image* im=new Image(path);
-                        images.push_back(im);
-                        im->CreateOpenGLTexture();
+						Image* im=new Image(path);
+						images.push_back(im);
+						imagesTexture[images.size()-1] = {im->GetTextureSpec(), im->GetImageBuffer()};
 					}
 				}
 
@@ -284,6 +293,7 @@ int main(int, char**)
 						images.push_back(new Image(width, height, channels, (ModelType)type, value));
 					}
 				}
+
 				if (ImGui::CollapsingHeader("Create Image with path"))
 				{
 					if(ImGui::Button("Choose Image"))
@@ -519,9 +529,9 @@ int main(int, char**)
 							}
 
 							ImGui::Separator();
-                            ImGui::PushID("BooleanOperator");
+							ImGui::PushID("BooleanOperator");
 							ImGui::Text("Boolean ceil as requested");
-                            if (ImGui::Button("operator< ")) {
+							if (ImGui::Button("operator< ")) {
 								Image img = *images[leftImage] < operatorChannel;
 								images.push_back(new Image(img));
 							}
@@ -549,31 +559,31 @@ int main(int, char**)
 
 							ImGui::Separator();
 							ImGui::PushID("PixelOperator");
-                            ImGui::Text("Pixel value ceil, bonus");
-                            if (ImGui::Button("operator< ")) {
-                                Image img = images[leftImage]->lt(operatorChannel);
-                                images.push_back(new Image(img));
-                            }
-                            if (ImGui::Button("operator<=")) {
-                                Image img = images[leftImage]->le(operatorChannel);
-                                images.push_back(new Image(img));
-                            }
-                            if (ImGui::Button("operator> ")) {
-                                Image img = images[leftImage]->gt(operatorChannel);
-                                images.push_back(new Image(img));
-                            }
-                            if (ImGui::Button("operator>=")) {
-                                Image img = images[leftImage]->ge(operatorChannel);
-                                images.push_back(new Image(img));
-                            }
-                            if (ImGui::Button("operator==")) {
-                                Image img = images[leftImage]->eq(operatorChannel);
-                                images.push_back(new Image(img));
-                            }
-                            if (ImGui::Button("operator!=")) {
-                                Image img = images[leftImage]->ne(operatorChannel);
-                                images.push_back(new Image(img));
-                            }
+							ImGui::Text("Pixel value ceil, bonus");
+							if (ImGui::Button("operator< ")) {
+								Image img = images[leftImage]->lt(operatorChannel);
+								images.push_back(new Image(img));
+							}
+							if (ImGui::Button("operator<=")) {
+								Image img = images[leftImage]->le(operatorChannel);
+								images.push_back(new Image(img));
+							}
+							if (ImGui::Button("operator> ")) {
+								Image img = images[leftImage]->gt(operatorChannel);
+								images.push_back(new Image(img));
+							}
+							if (ImGui::Button("operator>=")) {
+								Image img = images[leftImage]->ge(operatorChannel);
+								images.push_back(new Image(img));
+							}
+							if (ImGui::Button("operator==")) {
+								Image img = images[leftImage]->eq(operatorChannel);
+								images.push_back(new Image(img));
+							}
+							if (ImGui::Button("operator!=")) {
+								Image img = images[leftImage]->ne(operatorChannel);
+								images.push_back(new Image(img));
+							}
 							ImGui::PopID();
 							/*ImGui::Text("With images, experimental");
 							ImGui::BeginDisabled(images[rightImage] == nullptr);
@@ -695,7 +705,7 @@ int main(int, char**)
 						try {
 							imagesValues[index].value = &img.at(imgValueData.x, imgValueData.y, imgValueData.channel);
 						} catch (std::exception& e) {
-							std::cerr << e.what() << std::endl;
+							PC_CRITICAL("std::exception: {}", e.what());
 						}
 					}
 
@@ -708,36 +718,31 @@ int main(int, char**)
 					}
 
 					if (imagesValues.contains(index) && imagesValues[index].value) {
-						if(ImGui::DragScalar("Value", ImGuiDataType_U8, imagesValues[index].value, 1, nullptr, nullptr, "%d"))
-						{
-							img.UpdateOpenGLTexture();
-						}
+						img.Dirty |= ImGui::DragScalar("Value", ImGuiDataType_U8, imagesValues[index].value, 1, nullptr, nullptr, "%d");
 					}
 				}
 
 				if(ImGui::CollapsingHeader("Image")) {
-					if (img.HasOpenGLTexture()) {
-						ImGui::SliderFloat("Image Size", &imagesValues[index].sizeMultiplier, 0.01f, 1.00f, "%.2f");
-						auto size = ImGui::GetContentRegionAvail();
-						size.x *= imagesValues[index].sizeMultiplier;
-						size.y *= imagesValues[index].sizeMultiplier;
-
-						size.y = size.x / img.GetRatio();
-						ImGui::Image((void *) (intptr_t) img.GetRenderId().value(), size);
-
-						if (ImGui::Button("Delete Texture")) {
-							img.DeleteOpenGLTexture();
-						}
-					} else {
-						if (ImGui::Button("Create Texture")) {
-							img.CreateOpenGLTexture();
-						}
+					if(ImGui::Button("Update Image")) {
+						imagesTexture[index] = {img.GetTextureSpec(), img.GetImageBuffer()};
 					}
+					if(img.Dirty) {
+						imagesTexture[index] = {img.GetTextureSpec(), img.GetImageBuffer()};
+						img.Dirty = false;
+					}
+					ImGui::SliderFloat("Image Size", &imagesValues[index].sizeMultiplier, 0.01f, 1.00f, "%.2f");
+					auto size = ImGui::GetContentRegionAvail();
+					size.x *= imagesValues[index].sizeMultiplier;
+					size.y *= imagesValues[index].sizeMultiplier;
+
+					size.y = size.x / img.GetRatio();
+					ImGui::Image((void *) (intptr_t) imagesTexture[index].GetRenderID(), size);
 				}
 
 				if (ImGui::Button("Duplicate"))
 				{
 					images.push_back(new Image(img));
+					imagesTexture[images.size() - 1] = {images.back()->GetTextureSpec(), images.back()->GetImageBuffer()};
 				}
 
 				if (ImGui::Button("Save"))
@@ -762,6 +767,7 @@ int main(int, char**)
 				delete imagePtr;
 				images[index] = nullptr;
 				imagesValues[index].value = nullptr;
+				imagesTexture.erase(index);
 			}
 		}
 
