@@ -254,20 +254,9 @@ Texture::Texture(Texture && other) noexcept : m_Specification(other.m_Specificat
 }
 
 Texture &Texture::operator=(Texture && other) noexcept {
-	TextureSpecification tmpSpecification = m_Specification;
-	uint32_t tmpRenderID = m_RenderID;
-	auto tmpSlot = m_Slot;
-
-	m_Specification = other.m_Specification;
-	m_RenderID = other.m_RenderID;
-	m_Slot = other.m_Slot;
-
-	other.m_Specification = tmpSpecification;
-	other.m_RenderID = tmpRenderID;
-	other.m_Slot = tmpSlot;
-
-
-
+	std::swap(m_Specification, other.m_Specification);
+	std::swap(m_RenderID, other.m_RenderID);
+	std::swap(m_Slot, other.m_Slot);
 	return *this;
 }
 

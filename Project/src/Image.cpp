@@ -15,7 +15,7 @@
 
 #include "Core/Logger.hpp"
 
-Image::Image() : m_Width(0), m_Height(0), m_Channels(0), m_ImageType(ModelType::None), m_Image(0)
+Image::Image() : m_Width(0), m_Height(0), m_Channels(0), m_ImageType(ModelType::None), m_Image(0), Dirty(false)
 {
 }
 
@@ -94,6 +94,28 @@ Image& Image::operator=(const Image & o)
 	Dirty = true;
 	return *this;
 }
+
+Image::Image(Image && o) noexcept : m_Width(o.m_Width), m_Height(o.m_Height), m_Channels(o.m_Channels), m_ImageType(o.m_ImageType), m_Image(std::move(o.m_Image))
+{
+	o.m_Width = {};
+	o.m_Height = {};
+	o.m_Channels = {};
+	o.m_ImageType = {};
+	Dirty = true;
+	o.Dirty = false;
+}
+
+Image &Image::operator=(Image&& o) noexcept {
+	std::swap(m_Width, o.m_Width);
+	std::swap(m_Height, o.m_Height);
+	std::swap(m_Channels, o.m_Channels);
+	std::swap(m_ImageType, o.m_ImageType);
+	std::swap(m_Image, o.m_Image);
+	Dirty = true;
+	o.Dirty = true;
+	return *this;
+}
+
 Image::~Image() = default;
 
 

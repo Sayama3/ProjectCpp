@@ -111,6 +111,8 @@ public:
 	Image(uint32_t width, uint32_t height, uint32_t channels, ModelType imageType, const uint8_t* imageBuffer, uint64_t imageSize);
 	Image(const Image&);
 	Image& operator=(const Image&);
+	Image(Image&&) noexcept;
+	Image& operator=(Image&&) noexcept;
 	~Image();
 public:
 

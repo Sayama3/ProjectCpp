@@ -25,6 +25,8 @@ set(SRC src/main.cpp
         include/Core/Macro.hpp
         include/Core/Optional.hpp
         include/OpenGL/TextureSpecification.hpp
+        src/Scripting/Pic.cpp
+        include/Scripting/Pic.hpp
 )
 
 add_executable(${EXE_TARGET_NAME} ${SRC})
