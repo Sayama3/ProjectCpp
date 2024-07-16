@@ -17,8 +17,8 @@ ImageIterator ImageIterator::operator++() {
     if (channel >= indexed.GetChannels()) {
         channel = 0;
         col++;
-        if (col >= indexed.GetWidth()) {
-            col = 0;
+        if ((col-startCol) >= width) {
+            col = startCol;
             row++;
         }
     }
@@ -34,6 +34,19 @@ ImageIterator ImageIterator::operator++(int _) {
 
 bool ImageIterator::operator!=(ImageIterator other) const {
     return other.row != this->row || other.col != this->col;
+}
+
+std::tuple<ImageIterator, ImageIterator> ImageIterator::filterIterators(int filterExtent) {
+    if(channel!=0)
+        std::cerr<<"Initializing a filter iterator not at the beggining of a channel, probably an error\n";
+    int startX = std::max(0, col - filterExtent);
+    int startY = std::max(0, row - filterExtent);
+    int endX = std::min(static_cast<uint32_t>(col + filterExtent + 1), indexed.GetWidth());
+    int endY = std::min(static_cast<uint32_t>(row + filterExtent + 1), indexed.GetHeight());
+    auto begin = ImageIterator(startX, startY, channel,
+                               endX - startX, indexed);
+    auto end = ImageIterator(startX, endY, channel, indexed);
+    return {begin, end};
 }
 
 #include "ImageIterator.hpp"

@@ -8,4 +8,5 @@ class test {
 int test_All();
 bool test_image();
 bool test_SimpleIterator();
+bool test_filterIterator();
 #endif //PROJECTCPP_TEST_HPP
