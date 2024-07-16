@@ -19,6 +19,8 @@ set(SRC src/main.cpp
         include/test.hpp
         src/ImageIterator.cpp
         include/ImageIterator.hpp
+        src/ImageTreatments.cpp
+        include/ImageTreatments.hpp
 )
 
 add_executable(${EXE_TARGET_NAME} ${SRC})

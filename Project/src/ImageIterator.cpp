@@ -7,22 +7,19 @@ pixel ImageIterator::operator*() const {
 }
 
 pixel &ImageIterator::operator*() {
-    return indexed(col, row, channel);
+    return indexed(getCol(), getRow(), getChannel());
 }
 
 ImageIterator ImageIterator::operator++() {
-    //if (((col + row) % 1000) == 0)
-    //    std::cerr << "++ing" << col << "," << row << std::endl;
     channel++;
-    if (channel >= indexed.GetChannels()) {
+    if (channel >= endChannel) {
         channel = 0;
-        col++;
-        if ((col-startCol) >= width) {
-            col = startCol;
-            row++;
+        relativeCol++;
+        if (relativeCol >= width) {
+            relativeCol = 0;
+            relativeRow++;
         }
     }
-    //std::cerr << "+=ed to " << col << "," << row << std::endl;
     return *this;
 }
 
@@ -33,18 +30,18 @@ ImageIterator ImageIterator::operator++(int _) {
 }
 
 bool ImageIterator::operator!=(ImageIterator other) const {
-    return other.row != this->row || other.col != this->col;
+    return other.getRow() != this->getRow() || other.getCol()!= this->getCol() ||
+           other.getChannel() != this->getChannel();
 }
 
 std::tuple<ImageIterator, ImageIterator> ImageIterator::filterIterators(int filterExtent) {
-    if(channel!=0)
-        std::cerr<<"Initializing a filter iterator not at the beggining of a channel, probably an error\n";
-    int startX = std::max(0, col - filterExtent);
-    int startY = std::max(0, row - filterExtent);
-    int endX = std::min(static_cast<uint32_t>(col + filterExtent + 1), indexed.GetWidth());
-    int endY = std::min(static_cast<uint32_t>(row + filterExtent + 1), indexed.GetHeight());
+    int startX = std::max(0, relativeCol - filterExtent);
+    int startY = std::max(0, relativeRow - filterExtent);
+    int endX = std::min(static_cast<uint32_t>(relativeCol + filterExtent + 1), indexed.GetWidth());
+    int endY = std::min(static_cast<uint32_t>(relativeRow + filterExtent + 1), indexed.GetHeight());
     auto begin = ImageIterator(startX, startY, channel,
-                               endX - startX, indexed);
+                               endX - startX,channel+1, indexed);
+    //We don't need maxWidth nor channel, only used for comparison of a non moving iterator
     auto end = ImageIterator(startX, endY, channel, indexed);
     return {begin, end};
 }

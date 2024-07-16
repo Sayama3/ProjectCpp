@@ -51,7 +51,7 @@ bool test_image() {
     int cnt = 0;
     int w = 255;
     int h = 321;
-    int c = 1;
+    int c = 4;
     Image image(w, h, c, ModelType::ARGB, 125);
     for (ImageIterator it(image); it != end(image); it++) {
         if (*it != 125)
@@ -68,42 +68,40 @@ bool test_filterIterator() {
         Image image = sampleImg();
         for (ImageIterator it(image); it != end(image); it++) {
             uint8_t last = 0;
-            //if (it.getCol() == 1 && it.getRow() == 1) {
-            if (it.getChannel() == 0) {
-                std::cout << static_cast<int>(*it) << ">>>>>>>";
-                auto [filterIt, endIterator] = it.filterIterators(1);
-                for (; filterIt != endIterator; filterIt++) {
-                    if (filterIt.getChannel() == 0)
-                        std::cout << static_cast<int>(*filterIt) << ", ";
-                    if (*it < last)
-                        return false;
-                }
-                std::cout << std::endl;
+            //if (it.getRelativeChannel() == 0) {
+            std::cout << static_cast<int>(*it) << ">>>>>>>";
+            auto [filterIt, endIterator] = it.filterIterators(1);
+            for (; filterIt != endIterator; filterIt++) {
+                if (filterIt.getRelativeChannel() == 0)
+                    std::cout << static_cast<int>(*filterIt) << ", ";
+                if (*it < last)
+                    return false;
             }
+            std::cout << std::endl;
             //}
         }
     }
+    std::cerr << "First part of test passed" << std::endl;
     //Test2 filterSizes
     {
         Image image = Image(256, 256, 3, ModelType::HSL, 0);
         int filterSize = 1;
-        int square = std::pow(((filterSize * 2) + 1), 2) * image.GetChannels();
+        int square = std::pow(((filterSize * 2) + 1), 2);
         for (ImageIterator it(image); it != end(image); it++) {
-            if (it.getChannel() == 0) {
-                auto [filterIt, endIterator] = it.filterIterators(filterSize);
-                int count = 0;
-                for (; filterIt != endIterator; filterIt++) {
-                    count++;
-                }
-                int margin = filterSize + 1;
-                if (it.getRow() > margin && it.getRow() < (image.GetHeight() - margin) && it.getCol() > margin &&
-                    it.getCol() < (image.GetWidth() - margin)) {
-                    if (count != square)
-                        return false;
-                } else {
-                    if (count > square)
-                        return false;
-                }
+            auto [filterIt, endIterator] = it.filterIterators(filterSize);
+            int count = 0;
+            for (; filterIt != endIterator; filterIt++) {
+                count++;
+            }
+            int margin = filterSize + 1;
+            if (it.getRelativeRow() > margin && it.getRelativeRow() < (image.GetHeight() - margin) &&
+                it.getRelativeCol() > margin &&
+                it.getRelativeCol() < (image.GetWidth() - margin)) {
+                if (count != square)
+                    return false;
+            } else {
+                if (count > square)
+                    return false;
             }
         }
     }

@@ -7,46 +7,66 @@
 #include <iostream>
 #include "Image.hpp"
 
-typedef uint8_t pixel;
+typedef uint8_t const pixel;
 
 class ImageIterator : std::iterator<std::forward_iterator_tag, pixel> {
 private:
-    int row;
-    int col;
+    int startRow;
+    int relativeRow;
     int startCol;
+    int relativeCol;
     uint32_t width;
+    int startChannel;
     int channel;
-    Image &indexed;
+    int endChannel;
+    const Image &indexed;
 public:
 
+    int getRelativeRow() const {
+        return relativeRow;
+    }
     int getRow() const {
-        return row;
+        return relativeRow + startRow;
     }
 
+    int getRelativeCol() const {
+        return relativeCol;
+    }
     int getCol() const {
-        return col;
+        return relativeCol + startCol;
     }
 
-    int getChannel() const {
+    int getRelativeChannel() const {
         return channel;
     }
+    int getChannel() const {
+        return channel + startChannel;
+    }
 
-    explicit inline ImageIterator(int x, int y, int channel, uint32_t width,
-                                  Image &indexed) : row(y), col(x), channel(channel),
-                                                    width(width),
-                                                    indexed(indexed), startCol(col) {
+    explicit inline ImageIterator(int x, int y, int channel, uint32_t width, int endChannel,
+                                  const Image &indexed) : relativeRow(0), startRow(y), relativeCol(0), startCol(x), channel(0), startChannel(channel),
+                                                          width(width),
+                                                          indexed(indexed),
+                                                          endChannel(endChannel) {
         //std::cerr << " creating v_it" << x << "," << y << std::endl;
     }
 
-    explicit inline ImageIterator(int x, int y, int channel, Image &indexed) : ImageIterator(x, y, channel,indexed.GetWidth(),indexed) {
+    explicit inline ImageIterator(int x, int y, int channel, uint32_t width,
+                                  const Image &indexed) : ImageIterator(x, y, channel, indexed.GetWidth(),
+                                                                        indexed.GetChannels(), indexed) {
+    }
+
+    explicit inline ImageIterator(int x, int y, int channel, const Image &indexed) : ImageIterator(x, y, channel,
+                                                                                                   indexed.GetWidth(),
+                                                                                                   indexed) {
 
     }
 
-    explicit inline ImageIterator(int x, int y, Image &indexed) : ImageIterator(x, y, 0, indexed) {
+    explicit inline ImageIterator(int x, int y, const Image &indexed) : ImageIterator(x, y, 0, indexed) {
 
     }
 
-    explicit inline ImageIterator(Image &indexed) : ImageIterator(0, 0, indexed) {
+    explicit inline ImageIterator(const Image &indexed) : ImageIterator(0, 0, indexed) {
     }
 
     //Will default to 1, especially when we don't need it, for end typically ?
@@ -61,14 +81,15 @@ public:
     bool operator!=(ImageIterator other) const;
 
     std::tuple<ImageIterator, ImageIterator> filterIterators(int filterExtent);
+
     //Because why not, equivalent to filterIterators(0) actually
-    std::tuple<ImageIterator, ImageIterator> pixelValues(){
-        return {ImageIterator(col, row, 0,1,  indexed), ImageIterator(col, row+1, 0, indexed)};
+    std::tuple<ImageIterator, ImageIterator> pixelValues() {
+        return {ImageIterator(relativeCol, relativeRow, 0, 1, indexed), ImageIterator(relativeCol, relativeRow + 1, 0, indexed)};
     }
 };
 
-inline ImageIterator end(Image image) {
-    return ImageIterator(0, image.GetHeight(), 0, 0, image);
+inline ImageIterator end(const Image& image) {
+    return ImageIterator(0, image.GetHeight(), 0, image);
 }
 
 
