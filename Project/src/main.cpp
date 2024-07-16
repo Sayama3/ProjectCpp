@@ -18,6 +18,7 @@
 #include <stb_image_write.h>
 
 #include "Image.hpp"
+#include "test.hpp"
 
 #include <cstdio>
 #include <cstring>
@@ -140,6 +141,12 @@ void UseDockSpace(GLFWwindow* window)
 // Main code
 int main(int, char**)
 {
+    int res = test_All();
+    if(res<0)
+    {
+        return res;
+    }else
+        return 0;
 	glfwSetErrorCallback(glfw_error_callback);
 	if (!glfwInit())
 		return 1;

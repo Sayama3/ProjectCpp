@@ -15,6 +15,10 @@ set(SRC src/main.cpp
         src/Image.cpp
         include/Image.hpp
         include/array.hpp
+        src/test.cpp
+        include/test.hpp
+        src/ImageIterator.cpp
+        include/ImageIterator.hpp
 )
 
 add_executable(${EXE_TARGET_NAME} ${SRC})

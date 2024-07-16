@@ -1529,22 +1529,22 @@ static int stbi_write_jpg_core(stbi__write_context *s, int width, int height, in
       const unsigned char *dataR = (const unsigned char *)data;
       const unsigned char *dataG = dataR + ofsG;
       const unsigned char *dataB = dataR + ofsB;
-      int x, y, pos;
+      int x, y, row;
       if(subsample) {
          for(y = 0; y < height; y += 16) {
             for(x = 0; x < width; x += 16) {
                float Y[256], U[256], V[256];
-               for(row = y, pos = 0; row < y+16; ++row) {
+               for(row = y, row = 0; row < y+16; ++row) {
                   // row >= height => use last input row
                   int clamped_row = (row < height) ? row : height - 1;
                   int base_p = (stbi__flip_vertically_on_write ? (height-1-clamped_row) : clamped_row)*width*comp;
-                  for(col = x; col < x+16; ++col, ++pos) {
+                  for(col = x; col < x+16; ++col, ++row) {
                      // if col >= width => use pixel from last input column
                      int p = base_p + ((col < width) ? col : (width-1))*comp;
                      float r = dataR[p], g = dataG[p], b = dataB[p];
-                     Y[pos]= +0.29900f*r + 0.58700f*g + 0.11400f*b - 128;
-                     U[pos]= -0.16874f*r - 0.33126f*g + 0.50000f*b;
-                     V[pos]= +0.50000f*r - 0.41869f*g - 0.08131f*b;
+                     Y[row]= +0.29900f*r + 0.58700f*g + 0.11400f*b - 128;
+                     U[row]= -0.16874f*r - 0.33126f*g + 0.50000f*b;
+                     V[row]= +0.50000f*r - 0.41869f*g - 0.08131f*b;
                   }
                }
                DCY = stbiw__jpg_processDU(s, &bitBuf, &bitCnt, Y+0,   16, fdtbl_Y, DCY, YDC_HT, YAC_HT);
@@ -1556,11 +1556,11 @@ static int stbi_write_jpg_core(stbi__write_context *s, int width, int height, in
                {
                   float subU[64], subV[64];
                   int yy, xx;
-                  for(yy = 0, pos = 0; yy < 8; ++yy) {
-                     for(xx = 0; xx < 8; ++xx, ++pos) {
+                  for(yy = 0, row = 0; yy < 8; ++yy) {
+                     for(xx = 0; xx < 8; ++xx, ++row) {
                         int j = yy*32+xx*2;
-                        subU[pos] = (U[j+0] + U[j+1] + U[j+16] + U[j+17]) * 0.25f;
-                        subV[pos] = (V[j+0] + V[j+1] + V[j+16] + V[j+17]) * 0.25f;
+                        subU[row] = (U[j+0] + U[j+1] + U[j+16] + U[j+17]) * 0.25f;
+                        subV[row] = (V[j+0] + V[j+1] + V[j+16] + V[j+17]) * 0.25f;
                      }
                   }
                   DCU = stbiw__jpg_processDU(s, &bitBuf, &bitCnt, subU, 8, fdtbl_UV, DCU, UVDC_HT, UVAC_HT);
@@ -1572,17 +1572,17 @@ static int stbi_write_jpg_core(stbi__write_context *s, int width, int height, in
          for(y = 0; y < height; y += 8) {
             for(x = 0; x < width; x += 8) {
                float Y[64], U[64], V[64];
-               for(row = y, pos = 0; row < y+8; ++row) {
+               for(row = y, row = 0; row < y+8; ++row) {
                   // row >= height => use last input row
                   int clamped_row = (row < height) ? row : height - 1;
                   int base_p = (stbi__flip_vertically_on_write ? (height-1-clamped_row) : clamped_row)*width*comp;
-                  for(col = x; col < x+8; ++col, ++pos) {
+                  for(col = x; col < x+8; ++col, ++row) {
                      // if col >= width => use pixel from last input column
                      int p = base_p + ((col < width) ? col : (width-1))*comp;
                      float r = dataR[p], g = dataG[p], b = dataB[p];
-                     Y[pos]= +0.29900f*r + 0.58700f*g + 0.11400f*b - 128;
-                     U[pos]= -0.16874f*r - 0.33126f*g + 0.50000f*b;
-                     V[pos]= +0.50000f*r - 0.41869f*g - 0.08131f*b;
+                     Y[row]= +0.29900f*r + 0.58700f*g + 0.11400f*b - 128;
+                     U[row]= -0.16874f*r - 0.33126f*g + 0.50000f*b;
+                     V[row]= +0.50000f*r - 0.41869f*g - 0.08131f*b;
                   }
                }
 

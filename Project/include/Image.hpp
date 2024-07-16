@@ -245,7 +245,6 @@ public:
 
 
 
-
 private:
 	void UpdateImage();
 	void RecreateOpenGLTexture();
