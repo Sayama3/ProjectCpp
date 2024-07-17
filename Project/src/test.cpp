@@ -1,35 +1,34 @@
 #include "test.hpp"
-#include "ImageIterator.hpp"
 
 Image sampleImg() {
     Image img(3, 3, 3, ModelType::RGB, 0);
-    img(0, 0, 0) = 0;
-    img(0, 0, 1) = 0;
-    img(0, 0, 2) = 0;
-    img(1, 0, 0) = 1;
-    img(1, 0, 1) = 1;
-    img(1, 0, 2) = 1;
-    img(2, 0, 0) = 2;
-    img(2, 0, 1) = 2;
-    img(2, 0, 2) = 2;
-    img(0, 1, 0) = 3;
-    img(0, 1, 1) = 3;
-    img(0, 1, 2) = 3;
-    img(1, 1, 0) = 4;
-    img(1, 1, 1) = 4;
-    img(1, 1, 2) = 4;
-    img(2, 1, 0) = 5;
-    img(2, 1, 1) = 5;
-    img(2, 1, 2) = 5;
-    img(0, 2, 0) = 6;
-    img(0, 2, 1) = 6;
-    img(0, 2, 2) = 6;
-    img(1, 2, 0) = 7;
-    img(1, 2, 1) = 7;
-    img(1, 2, 2) = 7;
-    img(2, 2, 0) = 8;
-    img(2, 2, 1) = 8;
-    img(2, 2, 2) = 8;
+    img(0, 0, 0) = 1-1;
+    img(0, 0, 1) = 2-1;
+    img(0, 0, 2) = 3-1;
+    img(1, 0, 0) = 11-1;
+    img(1, 0, 1) = 12-1;
+    img(1, 0, 2) = 13-1;
+    img(2, 0, 0) = 21-1;
+    img(2, 0, 1) = 22-1;
+    img(2, 0, 2) = 23-1;
+    img(0, 1, 0) = 31-1;
+    img(0, 1, 1) = 32-1;
+    img(0, 1, 2) = 33-1;
+    img(1, 1, 0) = 41-1;
+    img(1, 1, 1) = 42-1;
+    img(1, 1, 2) = 43-1;
+    img(2, 1, 0) = 51-1;
+    img(2, 1, 1) = 52-1;
+    img(2, 1, 2) = 53-1;
+    img(0, 2, 0) = 61-1;
+    img(0, 2, 1) = 62-1;
+    img(0, 2, 2) = 63-1;
+    img(1, 2, 0) = 71-1;
+    img(1, 2, 1) = 72-1;
+    img(1, 2, 2) = 73-1;
+    img(2, 2, 0) = 81-1;
+    img(2, 2, 1) = 82-1;
+    img(2, 2, 2) = 83-1;
     return img;
 }
 
@@ -38,7 +37,7 @@ bool test_SimpleIterator() {
     ImageIterator it(0, 0, 0, img);
     ImageIterator end(0, 3, 0, img);
     uint8_t last = 0;
-    for (; it != end; it++) {
+    for (; it != end; ++it) {
         //std::cerr << *it << std::endl;
         if (*it < last)
             return false;
@@ -53,7 +52,7 @@ bool test_image() {
     int h = 321;
     int c = 4;
     Image image(w, h, c, ModelType::ARGB, 125);
-    for (ImageIterator it(image); it != end(image); it++) {
+    for (ImageIterator it(image); it != end(image); ++it) {
         if (*it != 125)
             return false;
         cnt++;
@@ -66,16 +65,19 @@ bool test_filterIterator() {
     //Test1 filterValues
     {
         Image image = sampleImg();
-        for (ImageIterator it(image); it != end(image); it++) {
+        for (ImageIterator it(image); it != end(image); ++it) {
             uint8_t last = 0;
             //if (it.getRelativeChannel() == 0) {
-            std::cout << static_cast<int>(*it) << ">>>>>>>";
+            uint8_t current = *it;
+            std::cout << static_cast<int>(current) << ">>>>>>>";
             auto [filterIt, endIterator] = it.filterIterators(1);
-            for (; filterIt != endIterator; filterIt++) {
-                if (filterIt.getRelativeChannel() == 0)
+            for (; filterIt != endIterator; ) {
+                if (true || filterIt.getRelativeChannel() == 0) {
                     std::cout << static_cast<int>(*filterIt) << ", ";
-                if (*it < last)
-                    return false;
+                    if (*filterIt < last || current % 10 != (*filterIt) % 10)
+                        return false;
+                }
+                ++filterIt;
             }
             std::cout << std::endl;
             //}
@@ -87,10 +89,10 @@ bool test_filterIterator() {
         Image image = Image(256, 256, 3, ModelType::HSL, 0);
         int filterSize = 1;
         int square = std::pow(((filterSize * 2) + 1), 2);
-        for (ImageIterator it(image); it != end(image); it++) {
+        for (ImageIterator it(image); it != end(image); ++it) {
             auto [filterIt, endIterator] = it.filterIterators(filterSize);
             int count = 0;
-            for (; filterIt != endIterator; filterIt++) {
+            for (; filterIt != endIterator; ++filterIt) {
                 count++;
             }
             int margin = filterSize + 1;
@@ -105,7 +107,7 @@ bool test_filterIterator() {
             }
         }
     }
-
+    std::cerr << "Second part of test passed" << std::endl;
     return true;
 }
 
@@ -116,5 +118,20 @@ int test_All() {
         return -101;
     if (!test_filterIterator())
         return -102;
+    if(!test_genericFilter())
+        return -103;
     return 0;
+}
+
+bool test_genericFilter() {
+    Image img = sampleImg();
+    Image expected(img);
+    Image blurred=medianBlur<2>(img);
+    ImageIterator it(expected);
+    ImageIterator en = end(expected);
+    Image copy(img);
+    for (; it != en; ++it) {
+
+    }
+    return false;
 }

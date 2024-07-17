@@ -18,7 +18,7 @@ private:
     uint32_t width;
     int startChannel;
     int channel;
-    int endChannel;
+    int amountOfChannel;
     const Image &indexed;
 public:
 
@@ -43,17 +43,17 @@ public:
         return channel + startChannel;
     }
 
-    explicit inline ImageIterator(int x, int y, int channel, uint32_t width, int endChannel,
+    explicit inline ImageIterator(int x, int y, int channel, uint32_t width, int amountOfChannel,
                                   const Image &indexed) : relativeRow(0), startRow(y), relativeCol(0), startCol(x), channel(0), startChannel(channel),
                                                           width(width),
                                                           indexed(indexed),
-                                                          endChannel(endChannel) {
+                                                          amountOfChannel(amountOfChannel) {
         //std::cerr << " creating v_it" << x << "," << y << std::endl;
     }
 
     explicit inline ImageIterator(int x, int y, int channel, uint32_t width,
                                   const Image &indexed) : ImageIterator(x, y, channel, indexed.GetWidth(),
-                                                                        indexed.GetChannels(), indexed) {
+                                                                        indexed.GetChannels()-channel, indexed) {
     }
 
     explicit inline ImageIterator(int x, int y, int channel, const Image &indexed) : ImageIterator(x, y, channel,
@@ -68,6 +68,13 @@ public:
 
     explicit inline ImageIterator(const Image &indexed) : ImageIterator(0, 0, indexed) {
     }
+    inline ImageIterator(const ImageIterator& image) : ImageIterator(image.getRelativeCol(), image.getRelativeRow(), image.getRelativeChannel(), image.indexed) {
+        this->startCol = image.startCol;
+        this->startRow = image.startRow;
+        this->startChannel = image.startChannel;
+        this->width = image.width;
+        this->amountOfChannel = image.amountOfChannel;
+    }
 
     //Will default to 1, especially when we don't need it, for end typically ?
     pixel operator*() const;
@@ -75,8 +82,6 @@ public:
     pixel &operator*();
 
     ImageIterator operator++();
-
-    ImageIterator operator++(int _);
 
     bool operator!=(ImageIterator other) const;
 
