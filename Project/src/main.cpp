@@ -145,8 +145,8 @@ int main(int, char**)
     if(res<0)
     {
         return res;
-    }else
-        return 0;
+    //}else
+    //    return 0;
 	glfwSetErrorCallback(glfw_error_callback);
 	if (!glfwInit())
 		return 1;
