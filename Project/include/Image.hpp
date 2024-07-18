@@ -13,6 +13,9 @@
 #include <cstring>
 #include <cstdint>
 
+#include "Core/Buffer.hpp"
+#include "OpenGL/TextureSpecification.hpp"
+
 struct Vec2UI
 {
 	uint32_t x;
@@ -66,6 +69,21 @@ namespace ImageHelper
 		}
 	}
 
+	inline ModelType GetImageTypeFromName(std::string name) {
+		std::transform(name.begin(), name.end(), name.begin(), [](unsigned char c){return std::tolower(c);});
+		if(name.find("rgb") != std::string::npos) return ModelType::RGB;
+		if(name.find("rgba") != std::string::npos) return ModelType::RGBA;
+		if(name.find("hsl") != std::string::npos) return ModelType::HSL;
+		if(name.find("gray") != std::string::npos) return ModelType::Gray;
+		if(name.find("argb") != std::string::npos) return ModelType::ARGB;
+		if(name.find("cmjn") != std::string::npos) return ModelType::CMJN;
+		if(name.find("hsla") != std::string::npos) return ModelType::HSLA;
+		if(name.find("grey") != std::string::npos) return ModelType::Gray;
+
+		PC_ERROR("The ModelType '{}' is unknown.", name);
+		return ModelType::None;
+	}
+
 	inline uint32_t GetModelTypeChannelCount(ModelType mt)
 	{
 		switch (mt) {
@@ -108,7 +126,10 @@ public:
 	Image(uint32_t width, uint32_t height, uint32_t channels, ModelType imageType, const uint8_t* imageBuffer, uint64_t imageSize);
 	Image(const Image&);
 	Image& operator=(const Image&);
+	Image(Image&&) noexcept;
+	Image& operator=(Image&&) noexcept;
 	~Image();
+public:
 
 	// Getter Setters
 	[[nodiscard]] uint32_t GetWidth() const;
@@ -130,8 +151,9 @@ public:
 	uint8_t& operator() (uint32_t x, uint32_t y, uint32_t channel);
 	const uint8_t& operator() (uint32_t x, uint32_t y, uint32_t channel) const;
 
-    //<
+	public:
 
+    //<
     [[nodiscard]] Image lt (uint8_t ceil) const;
     //>=
     [[nodiscard]] Image ge(uint8_t ceil) const{return ~(~this->lt(Invert(ceil)));}
@@ -156,13 +178,9 @@ public:
 
     Image& set(uint32_t x, uint32_t y, uint32_t channel,int32_t val);
     Image& add(uint32_t x, uint32_t y, uint32_t channel, int16_t val);
-
-
-        void CreateOpenGLTexture();
-	void DeleteOpenGLTexture();
-	void UpdateOpenGLTexture();
-	bool HasOpenGLTexture() const;
-	std::optional<uint32_t> GetRenderId() const;
+public:
+	Buffer GetImageBuffer();
+	TextureSpecification GetTextureSpec() const;
 public:
 	/*
 	- l’addition avec une autre image (via + et +=) : on additionne les valeurs des pixels correspondants
@@ -242,12 +260,8 @@ public:
     friend Image operator!=(Image lft, uint8_t ceil) { return (lft<ceil)+(lft>ceil);}
     friend Image operator==(Image lft, uint8_t ceil) {return ~(lft!=ceil);}
 
-
-
-
 private:
 	void UpdateImage();
-	void RecreateOpenGLTexture();
 
 	[[nodiscard]] uint32_t GetIndex(uint32_t x, uint32_t y) const;
 	[[nodiscard]] uint32_t GetIndex(Vec2UI pos) const;
@@ -261,7 +275,8 @@ private:
 	uint32_t m_Channels;
 	ModelType m_ImageType;
 	std::vector<uint8_t> m_Image;
-	std::optional<uint32_t> m_RenderId;
+public:
+	bool Dirty{true};
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Image& img)

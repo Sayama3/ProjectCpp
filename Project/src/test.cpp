@@ -1,4 +1,5 @@
 #include "test.hpp"
+#include "Core/Logger.hpp"
 
 Image sampleImg() {
     Image img(3, 3, 3, ModelType::RGB, 0);

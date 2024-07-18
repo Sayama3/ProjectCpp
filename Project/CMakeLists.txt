@@ -14,13 +14,44 @@ set(SRC src/main.cpp
         src/ThirdPartiesImplementor.cpp
         src/Image.cpp
         include/Image.hpp
-        include/array.hpp
+        include/Core/array.hpp
+        
+        src/OpenGL/Texture.cpp
+        include/OpenGL/Texture.hpp
+        src/Core/Buffer.cpp
+        include/Core/Buffer.hpp
+        src/Core/Logger.cpp
+        include/Core/Logger.hpp
+        include/Core/Profiler.hpp
+        include/Core/Macro.hpp
+        include/Core/Optional.hpp
+        include/OpenGL/TextureSpecification.hpp
+        src/Scripting/Commands.cpp
+        include/Scripting/Commands.hpp
+        src/ImGui/ImGuiContext.cpp
+        include/ImGui/ImGuiContext.hpp
+        src/Core/Application.cpp
+        include/Core/Application.hpp
+        src/Core/Window.cpp
+        include/Core/Window.hpp
+        src/Panels/ImageCreator.cpp
+        include/Panels/ImageCreator.hpp
+        src/Panels/PicPanel.cpp
+        include/Panels/PicPanel.hpp
+        include/Panels/Panel.hpp
+
         src/test.cpp
         include/test.hpp
         src/ImageIterator.cpp
         include/ImageIterator.hpp
         src/ImageTreatments.cpp
         include/ImageTreatments.hpp
+        include/Core/FileSystem.hpp
+        src/Scripting/Pic.cpp
+        include/Scripting/Pic.hpp
+
+        include/ImGui/imgui_stdlib.h
+        src/ImGui/imgui_stdlib.cpp
 )
 
 add_executable(${EXE_TARGET_NAME} ${SRC})
@@ -35,6 +66,10 @@ elseif(CMAKE_BUILD_TYPE MATCHES "[Rr][Ee][Ll][Ee][Aa][Ss][Ee]")
 elseif(CMAKE_BUILD_TYPE MATCHES "[Dd][Ii][Ss][Tt]")
     target_compile_definitions(${EXE_TARGET_NAME} PUBLIC PC_DIST)
 endif()
+target_compile_definitions(${EXE_TARGET_NAME} PUBLIC PC_USE_ASSERT)
+target_compile_definitions(${EXE_TARGET_NAME} PUBLIC PC_LOG)
+target_compile_definitions(${EXE_TARGET_NAME} PUBLIC PC_PROFILING)
+target_compile_definitions(${EXE_TARGET_NAME} PUBLIC PC_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/Data")
 
 target_compile_features(${EXE_TARGET_NAME} PUBLIC cxx_std_20)
 

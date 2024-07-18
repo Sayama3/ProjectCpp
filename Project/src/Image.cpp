@@ -4,7 +4,6 @@
 
 #include "Image.hpp"
 
-#include <cassert>
 #include <exception>
 #include <stdexcept>
 #include <string>
@@ -14,7 +13,9 @@
 #include <stb_image.h>
 #include <functional>
 
-Image::Image() : m_Width(0), m_Height(0), m_Channels(0), m_ImageType(ModelType::None), m_Image(0)
+#include "Core/Logger.hpp"
+
+Image::Image() : m_Width(0), m_Height(0), m_Channels(0), m_ImageType(ModelType::None), m_Image(0), Dirty(false)
 {
 }
 
@@ -22,7 +23,7 @@ Image::Image(const std::filesystem::path &path) : m_Width(0), m_Height(0), m_Cha
 {
 	if(!std::filesystem::exists(path))
 	{
-		std::cout << "The file '" << path << "' doesn't exist." << std::endl;
+		PC_WARN("The file '{}' doesn't exist.", path.string());
 		return;
 	}
 
@@ -33,7 +34,7 @@ Image::Image(const std::filesystem::path &path) : m_Width(0), m_Height(0), m_Cha
 
 	if(data == nullptr)
 	{
-		std::cout << "The file '" << path << "' wasn't load correctly.\n" << stbi_failure_reason() << std::endl;
+		PC_WARN("The file '{}' wasn't load correctly. '{}'", path.string(), stbi_failure_reason());
 		return;
 	}
 
@@ -71,14 +72,12 @@ Image::Image(uint32_t width, uint32_t height, uint32_t channels, ModelType image
 
 Image::Image(uint32_t width, uint32_t height, uint32_t channels, ModelType imageType, const std::vector<uint8_t>& image) : m_Width(width), m_Height(height), m_Channels(channels), m_ImageType(imageType), m_Image(image)
 {
-	assert(image.size() == width * height * channels);
-	CreateOpenGLTexture();
+	PC_ASSERT(image.size() == width * height * channels, "image.size()({}) == width({}) * height({}) * channels({}) (={})",image.size(),width,height,channels, width*height*channels);
 }
 
 Image::Image(uint32_t width, uint32_t height, uint32_t channels, ModelType imageType, const uint8_t *imageBuffer, uint64_t imageSize) : m_Width(width), m_Height(height), m_Channels(channels), m_ImageType(imageType), m_Image(imageBuffer, imageBuffer + imageSize)
 {
-	assert(imageSize == width * height * channels);
-	CreateOpenGLTexture();
+	PC_ASSERT(imageSize == width * height * channels, "imageSize({}) == width({}) * height({}) * channels({}) (={})",imageSize,width,height,channels, width*height*channels);
 }
 
 Image::Image(const Image & o) : m_Width(o.m_Width), m_Height(o.m_Height), m_Channels(o.m_Channels), m_ImageType(o.m_ImageType), m_Image(o.m_Image)
@@ -92,18 +91,32 @@ Image& Image::operator=(const Image & o)
 	m_Channels = o.m_Channels;
 	m_ImageType = o.m_ImageType;
 	m_Image = o.m_Image;
-
-	if(HasOpenGLTexture()) RecreateOpenGLTexture();
+	Dirty = true;
 	return *this;
 }
-Image::~Image()
+
+Image::Image(Image && o) noexcept : m_Width(o.m_Width), m_Height(o.m_Height), m_Channels(o.m_Channels), m_ImageType(o.m_ImageType), m_Image(std::move(o.m_Image))
 {
-	if(m_RenderId)
-	{
-		uint32_t renderId = m_RenderId.value();
-		glDeleteTextures(1, &renderId);
-	}
+	o.m_Width = {};
+	o.m_Height = {};
+	o.m_Channels = {};
+	o.m_ImageType = {};
+	Dirty = true;
+	o.Dirty = false;
 }
+
+Image &Image::operator=(Image&& o) noexcept {
+	std::swap(m_Width, o.m_Width);
+	std::swap(m_Height, o.m_Height);
+	std::swap(m_Channels, o.m_Channels);
+	std::swap(m_ImageType, o.m_ImageType);
+	std::swap(m_Image, o.m_Image);
+	Dirty = true;
+	o.Dirty = true;
+	return *this;
+}
+
+Image::~Image() = default;
 
 
 uint32_t Image::GetWidth() const
@@ -124,8 +137,7 @@ void Image::SetWidth(uint32_t width)
 			}
 		}
 	}
-	m_Image = newImage;
-	//TODO: Resize the image.
+	std::swap(m_Image, newImage);
 	m_Width = width;
 	UpdateImage();
 }
@@ -148,7 +160,7 @@ void Image::SetHeight(uint32_t height)
 			}
 		}
 	}
-	m_Image = newImage;
+	std::swap(m_Image, newImage);
 	m_Height = height;
 	UpdateImage();
 }
@@ -203,8 +215,9 @@ ModelType Image::GetImageType() const
 }
 void Image::ConvertImageToModelType(ModelType imageType){
 	std::function<std::vector<uint8_t>(std::vector<uint8_t>)> conv=[&](std::vector<uint8_t> in ) {
-		if(imageType!=m_ImageType)
-			std::cerr<<"Conversion from "<< (int)m_ImageType << " to " <<(int)imageType<<std::endl;
+		if(imageType!=m_ImageType) {
+			PC_ERROR("Conversion from {} to {} not handled yet.", (int)m_ImageType, (int)imageType);
+		}
 		return in;
 	};
 	switch(m_ImageType){
@@ -294,7 +307,7 @@ void Image::ConvertImageToModelType(ModelType imageType){
 		for (int x = 0; x < m_Width; ++x) {
 			auto begin=m_Image.begin()+(y * m_Width * m_Channels + x * m_Channels);
 			std::vector<uint8_t> pix(begin,begin+m_Channels);
-			assert(pix.size()==m_Channels);
+			PC_ASSERT(pix.size()==m_Channels, "pix.size()({})==m_Channels({})",pix.size(),m_Channels);
 			pix=conv(pix);
 			uint8_t* ptrTrg = &newPixels[(y * m_Width * targetChannelCount + x * targetChannelCount)];
 			std::memcpy(ptrTrg, pix.data(), pix.size() * sizeof(pix[0]));
@@ -303,11 +316,7 @@ void Image::ConvertImageToModelType(ModelType imageType){
 	m_ImageType=imageType;
 	m_Channels=targetChannelCount;
 	m_Image=newPixels;
-
-	if(m_RenderId)
-	{
-		RecreateOpenGLTexture();
-	}
+	Dirty = true;
 }
 
 void Image::SetImageType(ModelType imageType)
@@ -319,7 +328,7 @@ void Image::SetImageType(ModelType imageType)
 void Image::UpdateImage()
 {
 	m_Image.resize(m_Width * m_Height * m_Channels);
-	if(HasOpenGLTexture()) RecreateOpenGLTexture();
+	Dirty = true;
 }
 
 Vec2UI Image::GetPosition(uint32_t index) const {
@@ -364,93 +373,6 @@ const uint8_t &Image::operator()(uint32_t x, uint32_t y, uint32_t channel) const
 	return m_Image[GetIndex(x,y) + channel];
 }
 
-void Image::CreateOpenGLTexture()
-{
-	if(m_RenderId.has_value())
-	{
-		std::cout << "Texture Already Created." << std::endl;
-		return;
-	}
-
-	GLenum internalFormat = 0;
-	GLenum dataFormat = 0;
-
-	uint32_t rendererID;
-//    auto ch = std::max(ImageHelper::GetModelTypeChannelCount(m_ImageType), (uint32_t)3);
-	auto ch = m_Channels;
-	if(m_ImageType == ModelType::Gray && m_Channels != 0) ch = 3;
-	if(ch == 4) { internalFormat = GL_RGBA8; dataFormat = GL_RGBA; }
-	else if(ch == 3) { internalFormat = GL_RGB8; dataFormat = GL_RGB; }
-	else if(ch == 2) { internalFormat = GL_RG8; dataFormat = GL_RG; }
-	else if(ch == 1) { internalFormat = GL_R8; dataFormat = GL_RED; }
-
-	glCreateTextures(GL_TEXTURE_2D, 1, &rendererID);
-	glTextureStorage2D(rendererID, 1, internalFormat, static_cast<GLsizei>(m_Width), static_cast<GLsizei>(m_Height));
-
-	//TODO: Add parameter on the Texture API to be able to change this type of parameters.
-	glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTextureParameteri(rendererID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	m_RenderId = rendererID;
-	UpdateOpenGLTexture();
-}
-
-void Image::DeleteOpenGLTexture() {
-	if(m_RenderId)
-	{
-		uint32_t renderId = m_RenderId.value();
-		glDeleteTextures(1, &renderId);
-		m_RenderId = {};
-	}
-}
-
-void Image::RecreateOpenGLTexture()
-{
-	DeleteOpenGLTexture();
-	CreateOpenGLTexture();
-}
-
-void Image::UpdateOpenGLTexture()
-{
-	if(m_RenderId)
-	{
-		//TODO: recreate the image following the display mode.
-		GLenum dataFormat = 0;
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		//glTextureSubImage2D(m_RenderId.value(), 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE,m_Image.data());
-		//return;
-        if(m_ImageType==ModelType::Gray && m_Channels != 0) {
-			auto newImg(*this);
-			newImg.ConvertImageToModelType(ModelType::RGB);
-
-			if(newImg.m_Channels == 4) { dataFormat = GL_RGBA; }
-			else if(newImg.m_Channels == 3) { dataFormat = GL_RGB; }
-			else if(newImg.m_Channels == 2) { dataFormat = GL_RG; }
-			else if(newImg.m_Channels == 1) { dataFormat = GL_RED; }
-
-            glTextureSubImage2D(m_RenderId.value(), 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE,newImg.m_Image.data());
-        }
-        else
-		{
-			if(m_Channels == 4) { dataFormat = GL_RGBA; }
-			else if(m_Channels == 3) { dataFormat = GL_RGB; }
-			else if(m_Channels == 2) { dataFormat = GL_RG; }
-			else if(m_Channels == 1) { dataFormat = GL_RED; }
-
-			glTextureSubImage2D(m_RenderId.value(), 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, m_Image.data());
-		}
-	}
-}
-
-bool Image::HasOpenGLTexture() const {
-	return m_RenderId.has_value();
-}
-
-std::optional<uint32_t> Image::GetRenderId() const {
-	return m_RenderId;
-}
-
-
 Image &Image::operator+=(const Image &rht) {
 	if(m_Channels != rht.m_Channels)
 	{
@@ -474,7 +396,7 @@ Image &Image::operator+=(const Image &rht) {
 	m_Height = height;
 	m_Channels = channels;
 	m_Image = newImage;
-	UpdateOpenGLTexture();
+	Dirty = true;
 	return *this;
 }
 
@@ -524,7 +446,7 @@ Image &Image::operator-=(const Image &rht) {
 	m_Height = height;
 	m_Channels = channels;
 	m_Image = newImage;
-	UpdateOpenGLTexture();
+	Dirty = true;
 	return *this;
 }
 
@@ -574,7 +496,7 @@ Image &Image::operator^=(const Image &rht) {
 	m_Height = height;
 	m_Channels = channels;
 	m_Image = newImage;
-	UpdateOpenGLTexture();
+	Dirty = true;
 	return *this;
 }
 
@@ -668,8 +590,20 @@ Image &Image::add(uint32_t x, uint32_t y, uint32_t channel, int16_t val) {
 	return *this;
 }
 
+Buffer Image::GetImageBuffer() {
+	return {m_Image.data(), m_Image.size()};
+}
 
+TextureSpecification Image::GetTextureSpec() const {
+	TextureSpecification spec;
+	spec.width = m_Width;
+	spec.height = m_Height;
+	spec.channels = m_Channels;
 
+	spec.pixelFormat = (PixelFormat)m_Channels;
+	spec.pixelType = PixelType::PX_8;
 
+	spec.generateMipMaps = true;
 
-
+	return spec;
+}
