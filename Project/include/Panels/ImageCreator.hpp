@@ -37,7 +37,7 @@ namespace PC {
 		void Update();
 		void PostUpdate();
 	public:
-		std::string path = R"(D:\Data\Projects\Unity\ProjectCpp\Project\Data\seminaire.png)";
+		std::string path = std::string(PC_DATA_PATH) + "/seminaire.png";
 	private:
 		const uint32_t uMin = 0;
 		const uint32_t uMax = UINT32_MAX;

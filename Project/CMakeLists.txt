@@ -52,6 +52,7 @@ endif()
 target_compile_definitions(${EXE_TARGET_NAME} PUBLIC PC_USE_ASSERT)
 target_compile_definitions(${EXE_TARGET_NAME} PUBLIC PC_LOG)
 target_compile_definitions(${EXE_TARGET_NAME} PUBLIC PC_PROFILING)
+target_compile_definitions(${EXE_TARGET_NAME} PUBLIC PC_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/Data")
 
 target_compile_features(${EXE_TARGET_NAME} PUBLIC cxx_std_20)
 
