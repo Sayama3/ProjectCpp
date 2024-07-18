@@ -21,5 +21,7 @@ inline Image medianBlur(const Image &img) {
     std::vector<std::vector<float>> filter(N, std::vector<float>(N,1.f));
     return genericFilter(img, filter,true);
 }
+template<int N> Image erode(const Image& img);
+template<int N> Image dilate(const Image& img);
 
 #endif //PROJECTCPP_IMAGETREATMENTS_HPP
