@@ -91,7 +91,7 @@ namespace Pic {
 
 	Image ThresholdCommand::Execute(Image img) {
 		img.SetWidth(img.GetWidth() + threshold);
-		img.SetHeight(img.GetWidth() + threshold);
+		img.SetHeight(img.GetHeight() + threshold);
 		return std::move(img);
 	}
 
