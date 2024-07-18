@@ -19,6 +19,7 @@
 #include "Core/Application.hpp"
 #include "Panels/ImageCreator.hpp"
 #include "Panels/PicPanel.hpp"
+#include "test.hpp"
 
 
 using namespace PC;
@@ -26,6 +27,12 @@ using namespace PC;
 int main(int, char**)
 {
 	Log::Init();
+
+    int res = test_All();
+    if(res<0)
+    {
+        return res;
+	}
 
 	std::unique_ptr<Application> application = std::make_unique<Application>();
 

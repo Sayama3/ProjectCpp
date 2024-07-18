@@ -15,6 +15,7 @@ set(SRC src/main.cpp
         src/Image.cpp
         include/Image.hpp
         include/Core/array.hpp
+        
         src/OpenGL/Texture.cpp
         include/OpenGL/Texture.hpp
         src/Core/Buffer.cpp
@@ -38,6 +39,13 @@ set(SRC src/main.cpp
         src/Panels/PicPanel.cpp
         include/Panels/PicPanel.hpp
         include/Panels/Panel.hpp
+
+        src/test.cpp
+        include/test.hpp
+        src/ImageIterator.cpp
+        include/ImageIterator.hpp
+        src/ImageTreatments.cpp
+        include/ImageTreatments.hpp
 )
 
 add_executable(${EXE_TARGET_NAME} ${SRC})
