@@ -12,4 +12,5 @@ bool test_image();
 bool test_SimpleIterator();
 bool test_filterIterator();
 bool test_genericFilter();
+bool iterator_traits_test();
 #endif //PROJECTCPP_TEST_HPP
