@@ -13,7 +13,7 @@
 #include <stb_image_write.h>
 
 namespace PC {
-	void ImageCreator::Update()
+	void ImageCreator::Update(float dt)
 	{
 		ImGui::Begin("Image Creator");
 		{
@@ -388,7 +388,7 @@ namespace PC {
 			ImGui::End();
 		}
 	}
-	void ImageCreator::PostUpdate() {
+	void ImageCreator::PostUpdate(float dt) {
 		for (int index = 0; index < images.size(); ++index)
 		{
 			Image* imagePtr = images[index];

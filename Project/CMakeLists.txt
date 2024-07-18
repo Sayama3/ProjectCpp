@@ -35,6 +35,9 @@ set(SRC src/main.cpp
         include/Core/Window.hpp
         src/Panels/ImageCreator.cpp
         include/Panels/ImageCreator.hpp
+        src/Panels/PicPanel.cpp
+        include/Panels/PicPanel.hpp
+        include/Panels/Panel.hpp
 )
 
 add_executable(${EXE_TARGET_NAME} ${SRC})

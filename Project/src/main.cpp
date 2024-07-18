@@ -18,6 +18,7 @@
 #include "Core/Logger.hpp"
 #include "Core/Application.hpp"
 #include "Panels/ImageCreator.hpp"
+#include "Panels/PicPanel.hpp"
 
 
 using namespace PC;
@@ -29,15 +30,36 @@ int main(int, char**)
 	std::unique_ptr<Application> application = std::make_unique<Application>();
 
 	{
+		double lastTime{0};
+		double deltaTime{1.0/60.0};
 		ImageCreator imCreator;
+		PicPanel picPanel;
+
+		imCreator.Begin();
+		picPanel.Begin();
+
 		while (application->ShouldUpdate()) {
+
+			{
+				double time = glfwGetTime();
+				deltaTime = time - lastTime;
+				lastTime = time;
+			}
+			auto dt = (float)deltaTime;
+
 			application->BeginUpdate();
 
-			imCreator.Update();
-			imCreator.PostUpdate();
+			imCreator.Update(dt);
+			imCreator.PostUpdate(dt);
+
+			picPanel.Update(dt);
+			picPanel.PostUpdate(dt);
 
 			application->EndUpdate();
 		}
+
+		imCreator.End();
+		picPanel.End();
 	}
 
 	return 0;

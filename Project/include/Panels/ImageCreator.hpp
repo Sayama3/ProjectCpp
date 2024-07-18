@@ -16,6 +16,7 @@
 #include "Core/Profiler.hpp"
 #include "Core/Application.hpp"
 #include "OpenGL/Texture.hpp"
+#include "Panel.hpp"
 
 namespace PC {
 
@@ -29,13 +30,13 @@ namespace PC {
 		uint8_t* value = nullptr;
 	};
 
-	class ImageCreator {
+	class ImageCreator : public Panel {
 	public:
 		ImageCreator();
-		~ImageCreator();
+		virtual ~ImageCreator() override;
 	public:
-		void Update();
-		void PostUpdate();
+		virtual void Update(float dt) override;
+		virtual void PostUpdate(float dt) override;
 	public:
 		std::string path = std::string(PC_DATA_PATH) + "/seminaire.png";
 	private:
