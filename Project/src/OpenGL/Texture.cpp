@@ -296,7 +296,7 @@ void Texture::CreateTexture() {
 	int height = static_cast<GLsizei>(m_Specification.height);
 	int channels = static_cast<GLsizei>(m_Specification.channels);
 
-	PC_CHECK(m_Specification.channels > 0 && m_Specification.channels < 5, "The number of channel {0} is not handle at the moment.", m_Specification.channels);
+	// PC_CHECK(m_Specification.channels > 0 && m_Specification.channels < 5, "The number of channel {0} is not handle at the moment.", m_Specification.channels);
 
 	GLenum internalFormat = helper.GetInternalFormat();
 
