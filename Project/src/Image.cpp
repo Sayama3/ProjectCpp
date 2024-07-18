@@ -600,5 +600,11 @@ TextureSpecification Image::GetTextureSpec() const {
 	spec.width = m_Width;
 	spec.height = m_Height;
 	spec.channels = m_Channels;
+
+	spec.pixelFormat = (PixelFormat)m_Channels;
+	spec.pixelType = PixelType::PX_8;
+
+	spec.generateMipMaps = true;
+
 	return spec;
 }

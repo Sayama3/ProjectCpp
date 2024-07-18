@@ -27,6 +27,14 @@ set(SRC src/main.cpp
         include/OpenGL/TextureSpecification.hpp
         src/Scripting/Pic.cpp
         include/Scripting/Pic.hpp
+        src/ImGui/ImGuiContext.cpp
+        include/ImGui/ImGuiContext.hpp
+        src/Core/Application.cpp
+        include/Core/Application.hpp
+        src/Core/Window.cpp
+        include/Core/Window.hpp
+        src/Panels/ImageCreator.cpp
+        include/Panels/ImageCreator.hpp
 )
 
 add_executable(${EXE_TARGET_NAME} ${SRC})

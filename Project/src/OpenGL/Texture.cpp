@@ -107,7 +107,7 @@ public:
 			case RGBA: return GL_RGBA;
 		}
 
-		PC_ASSERT(false, "The pixel format {0} do not exist...", (int)spec.pixelType);
+		PC_ERROR("The pixel format {0} do not exist... Returning RGBA", (int)spec.pixelFormat);
 		return GL_RGBA;
 	}
 

@@ -54,11 +54,11 @@ public:
 	void AddState(const std::string& stateName, const State& state, const std::string& previousState = {});
 	void AddState(const std::string& stateName, State&& state, const std::string& previousState = {});
 
-	bool HasState(const std::string& name) const;
+	[[nodiscard]] bool HasState(const std::string& name) const;
 	State* TryGetState(const std::string& name);
 	State* TryGetState(uint64_t index);
-	const std::string& GetStateName(uint64_t index) const;
-	uint64_t GetStateCount() const;
+	[[nodiscard]] const std::string& GetStateName(uint64_t index) const;
+	[[nodiscard]] uint64_t GetStateCount() const;
 private:
 	std::vector<std::string> m_StateOrder;
 	std::map<std::string, State> m_States;
