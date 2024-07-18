@@ -137,8 +137,7 @@ void Image::SetWidth(uint32_t width)
 			}
 		}
 	}
-	m_Image = newImage;
-	//TODO: Resize the image.
+	std::swap(m_Image, newImage);
 	m_Width = width;
 	UpdateImage();
 }
@@ -161,7 +160,7 @@ void Image::SetHeight(uint32_t height)
 			}
 		}
 	}
-	m_Image = newImage;
+	std::swap(m_Image, newImage);
 	m_Height = height;
 	UpdateImage();
 }
