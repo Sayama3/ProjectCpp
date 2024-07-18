@@ -65,7 +65,7 @@ namespace Pic {
 			if(!state.command) state.UpdateCommandFromString();
 			if(!state.command) continue;
 
-			const Image* imgPtr = state.command->HasSource() ? GetImage(state.command->GetTarget(), i) : nullptr;
+			const Image* imgPtr = state.command->HasSource() ? GetImage(state.command->GetSource(), i) : nullptr;
 			state.result = std::move(state.command->Execute(imgPtr ? *imgPtr : Image{}));
 			if(state.command->HasTarget()) {
 				state.resultTex = {state.result.GetTextureSpec(), state.result.GetImageBuffer()};

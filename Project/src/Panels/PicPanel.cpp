@@ -66,6 +66,11 @@ namespace PC {
 			for (int i = 0; i < state.States.size(); ++i) {
 				ImGui::PushID(i);
 				bool textChanged = ImGui::InputText("##State", &state.States[i].commandStr);
+
+				if(state.States[i].resultTex.GetRenderID()) {
+					ImGui::Image(reinterpret_cast<ImTextureID>(state.States[i].resultTex.GetRenderID()), ImVec2(state.States[i].result.GetWidth(), state.States[i].result.GetHeight()));
+				}
+
 				ImGui::PopID();
 
 				if(!textChanged) continue;
@@ -83,6 +88,7 @@ namespace PC {
 				if(ImGui::Button("Add New Line")) {
 					auto* command = Pic::CommandHelper::GetCommand(commandStr);
 					if(command) {
+						if(index == -1) index = state.States.size();
 						state.AddCommand(std::unique_ptr<Pic::Command>(command));
 					} else {
 						PC_WARN("The command '{}' is not valid.", commandStr);
@@ -92,6 +98,10 @@ namespace PC {
 
 			if(index != -1) {
 				state.Execute(index);
+			}
+
+			if(ImGui::Button("Re-run")) {
+				state.Execute();
 			}
 
 			if(ImGui::Button("Save")) {
