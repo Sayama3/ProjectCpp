@@ -322,6 +322,7 @@ void Texture::SetData(Buffer data) {
 	int channels = static_cast<GLsizei>(m_Specification.channels);
 
 	PC_ASSERT(width * height * channels * helper.GetPixelSize() == data.Size, "The size of the image ({0}) is different from the information of the texture (width: {1}, height: {2}, channel: {3}, pixelType: '{4}')", data.Size, width, height, channels, helper.GetTypeToString());
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glTextureSubImage2D(m_RenderID, 0, 0, 0, width, height, dataFormat, pixelType, data.Data);
 	if(m_Specification.generateMipMaps) {
 		glGenerateTextureMipmap(m_RenderID);
