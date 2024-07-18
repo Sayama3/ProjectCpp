@@ -26,8 +26,8 @@ set(SRC src/main.cpp
         include/Core/Macro.hpp
         include/Core/Optional.hpp
         include/OpenGL/TextureSpecification.hpp
-        src/Scripting/Pic.cpp
-        include/Scripting/Pic.hpp
+        src/Scripting/Commands.cpp
+        include/Scripting/Commands.hpp
         src/ImGui/ImGuiContext.cpp
         include/ImGui/ImGuiContext.hpp
         src/Core/Application.cpp
@@ -46,6 +46,12 @@ set(SRC src/main.cpp
         include/ImageIterator.hpp
         src/ImageTreatments.cpp
         include/ImageTreatments.hpp
+        include/Core/FileSystem.hpp
+        src/Scripting/Pic.cpp
+        include/Scripting/Pic.hpp
+
+        include/ImGui/imgui_stdlib.h
+        src/ImGui/imgui_stdlib.cpp
 )
 
 add_executable(${EXE_TARGET_NAME} ${SRC})

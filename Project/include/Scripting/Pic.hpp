@@ -1,125 +1,54 @@
 //
-// Created by ianpo on 06/07/2024.
+// Created by ianpo on 18/07/2024.
 //
 
 #pragma once
 
-#include <string>
-#include <variant>
-#include <vector>
-#include <optional>
-#include <memory>
-#include <map>
-#include <unordered_map>
-#include <utility>
-#include <unordered_map>
-#include "OpenGL/Texture.hpp"
 #include "Image.hpp"
+#include "OpenGL/Texture.hpp"
+#include "Commands.hpp"
+#include <vector>
+#include <filesystem>
+#include <unordered_map>
+#include <string>
+#include <cstdint>
+#include <memory>
+#include <tuple>
 
-//TODO: Implement a Command Pattern to describe and represent the change of the Image as we interact with it.
+namespace Pic {
+	class Pic {
+	public:
+		struct State {
+			std::string commandStr{};
+			std::unique_ptr<Command> command{nullptr};
+			Image result{};
+			Texture resultTex{};
 
-struct State {
-	State() = default;
+			void UpdateCommandFromString() {command.reset(CommandHelper::GetCommand(commandStr));}
 
-	State(const State&);
-	State& operator=(const State&);
+			operator bool() {return command.operator bool();}
+		};
+	public:
+		Pic() = default;
+		~Pic() = default;
+		Pic(const Pic&) = default;
+		Pic& operator=(const Pic&) = default;
+		Pic(Pic&& other) noexcept;
+		Pic& operator=(Pic&& other) noexcept;
 
-	State(State&&) noexcept;
-	State& operator=(State&&) noexcept;
-
-	State(const Image& image);
-	State(Image&& image);
-
-	~State() = default;
-
-	void CreateTextureFromImage();
-
-	Image image{};
-	Texture texture{};
-	std::string NextState{};
-	std::string PreviousState{};
-};
-
-class StateContainer {
-public:
-	StateContainer() = default;
-	StateContainer(const StateContainer&) = default;
-	StateContainer& operator=(const StateContainer&) = default;
-	StateContainer(StateContainer&&) noexcept;
-	StateContainer& operator=(StateContainer&&) noexcept;
-	StateContainer(const std::string& name, const State& state);
-	StateContainer(const std::string& name, State&& state);
-	~StateContainer() = default;
-public:
-	void AddState(const std::string& stateName, const State& state, const std::string& previousState = {});
-	void AddState(const std::string& stateName, State&& state, const std::string& previousState = {});
-
-	[[nodiscard]] bool HasState(const std::string& name) const;
-	State* TryGetState(const std::string& name);
-	State* TryGetState(uint64_t index);
-	[[nodiscard]] const std::string& GetStateName(uint64_t index) const;
-	[[nodiscard]] uint64_t GetStateCount() const;
-private:
-	std::vector<std::string> m_StateOrder;
-	std::map<std::string, State> m_States;
-};
-
-class Command {
-public:
-	~Command() = default;
-	/// Execute the command and return the name of the new state
-	virtual std::string Execute(StateContainer& sc) = 0;
-
-	/// Execute the undo command and/or return the name of the previous state
-	virtual std::string Undo(StateContainer& sc) = 0;
-};
-
-class LoadCommand : public Command
-{
-public:
-	LoadCommand(std::filesystem::path path, std::string variable);
-public:
-	virtual std::string Execute(StateContainer& sc) override;
-	virtual std::string Undo(StateContainer& sc) override;
-
-private:
-	std::filesystem::path source;
-	std::string variableStore;
-};
-
-class SaveCommand : public Command
-{
-public:
-	SaveCommand(std::string variable, std::filesystem::path path);
-	virtual std::string Execute(StateContainer& sc) override;
-	virtual std::string Undo(StateContainer& sc) override;
-private:
-	std::string variableSource;
-	std::filesystem::path pathTarget;
-};
-
-class ConvertCommand : public Command
-{
-public:
-	ConvertCommand(std::string variableSource, std::string variableTarget, ModelType conversionModel);
-public:
-	virtual std::string Execute(StateContainer& sc) override;
-	virtual std::string Undo(StateContainer& sc) override;
-private:
-	std::string variableSource;
-	std::string variableTarget;
-	ModelType conversionModel;
-};
-
-class ThresholdCommand : public Command
-{
-public:
-	ThresholdCommand(std::string variableSource, std::string variableTarget, uint32_t threshold);
-public:
-	virtual std::string Execute(StateContainer& sc) override;
-	virtual std::string Undo(StateContainer& sc) override;
-private:
-	std::string variableSource;
-	std::string variableTarget;
-	uint32_t threshold;
-};
+		Pic(const std::filesystem::path& path);
+		Pic(const std::string& picFileContent);
+	public:
+		void AddCommand(std::string command);
+		void AddCommand(std::unique_ptr<Command> command);
+	public:
+		void UpdateCommand(uint64_t index);
+		void Execute(uint64_t offset = 0);
+		/// Search for an image in the range [0, min(States.size, upperBound)[
+		const Image* GetImage(const std::string& variable, uint64_t upperBound = UINT64_MAX);
+	public:
+		[[nodiscard]] std::string ToString() const;
+	public:
+		std::vector<State> States;
+	};
+}

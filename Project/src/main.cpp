@@ -56,11 +56,15 @@ int main(int, char**)
 
 			application->BeginUpdate();
 
-			imCreator.Update(dt);
-			imCreator.PostUpdate(dt);
+			{
+				imCreator.Update(dt);
+				picPanel.Update(dt);
+			}
 
-			picPanel.Update(dt);
-			picPanel.PostUpdate(dt);
+			{
+				imCreator.PostUpdate(dt);
+				picPanel.PostUpdate(dt);
+			}
 
 			application->EndUpdate();
 		}

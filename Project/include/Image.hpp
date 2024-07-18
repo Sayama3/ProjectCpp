@@ -69,6 +69,21 @@ namespace ImageHelper
 		}
 	}
 
+	inline ModelType GetImageTypeFromName(std::string name) {
+		std::transform(name.begin(), name.end(), name.begin(), [](unsigned char c){return std::tolower(c);});
+		if(name.find("rgb") != std::string::npos) return ModelType::RGB;
+		if(name.find("rgba") != std::string::npos) return ModelType::RGBA;
+		if(name.find("hsl") != std::string::npos) return ModelType::HSL;
+		if(name.find("gray") != std::string::npos) return ModelType::Gray;
+		if(name.find("argb") != std::string::npos) return ModelType::ARGB;
+		if(name.find("cmjn") != std::string::npos) return ModelType::CMJN;
+		if(name.find("hsla") != std::string::npos) return ModelType::HSLA;
+		if(name.find("grey") != std::string::npos) return ModelType::Gray;
+
+		PC_ERROR("The ModelType '{}' is unknown.", name);
+		return ModelType::None;
+	}
+
 	inline uint32_t GetModelTypeChannelCount(ModelType mt)
 	{
 		switch (mt) {
