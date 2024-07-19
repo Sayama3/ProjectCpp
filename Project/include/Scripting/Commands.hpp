@@ -42,11 +42,11 @@ namespace Pic {
 	};
 
 	struct CommandCreator {
-		std::regex Checker;
+		bool(*Comparer)(const std::string&) = nullptr;
 		Command*(*Loader)(const std::string&) = nullptr;
 		std::string(*Saver)(const Command*) = nullptr;
 
-		friend bool operator==(const CommandCreator& lft, const CommandCreator& rht) {return lft.Loader == rht.Loader && lft.Saver == rht.Saver;}
+		friend bool operator==(const CommandCreator& lft, const CommandCreator& rht) {return lft.Comparer == rht.Comparer &&  lft.Loader == rht.Loader && lft.Saver == rht.Saver;}
 		friend bool operator!=(const CommandCreator& lft, const CommandCreator& rht) {return !(lft == rht);}
 	};
 
@@ -61,6 +61,7 @@ namespace Pic {
 		virtual Image Execute(Image img) override;
 	public:
 		static std::regex GetComparer();
+		static bool Compare(const std::string& content);
 		static Command* Create(const std::string& content);
 		static std::string Save(const Command* command);
 		virtual std::string ToString() const override {return Save(this);}
@@ -80,6 +81,7 @@ namespace Pic {
 		virtual Image Execute(Image img) override;
 	public:
 		static std::regex GetComparer();
+		static bool Compare(const std::string& content);
 		static Command* Create(const std::string& content);
 		static std::string Save(const Command* command);
 		virtual std::string ToString() const override {return Save(this);}
@@ -98,6 +100,7 @@ namespace Pic {
 		virtual Image Execute(Image img) override;
 	public:
 		static std::regex GetComparer();
+		static bool Compare(const std::string& content);
 		static Command* Create(const std::string& content);
 		static std::string Save(const Command* command);
 		virtual std::string ToString() const override {return Save(this);}
@@ -117,6 +120,7 @@ namespace Pic {
 		virtual Image Execute(Image img) override;
 	public:
 		static std::regex GetComparer();
+		static bool Compare(const std::string& content);
 		static Command* Create(const std::string& content);
 		static std::string Save(const Command* command);
 		virtual std::string ToString() const override {return Save(this);}
@@ -127,10 +131,10 @@ namespace Pic {
 	};
 
 	static inline std::vector<CommandCreator> s_Command {
-			{LoadCommand::GetComparer(), LoadCommand::Create, LoadCommand::Save},
-			{SaveCommand::GetComparer(), SaveCommand::Create, SaveCommand::Save},
-			{ConvertCommand::GetComparer(), ConvertCommand::Create, ConvertCommand::Save},
-			{ThresholdCommand::GetComparer(), ThresholdCommand::Create, ThresholdCommand::Save},
+			{LoadCommand::Compare, LoadCommand::Create, LoadCommand::Save},
+			{SaveCommand::Compare, SaveCommand::Create, SaveCommand::Save},
+			{ConvertCommand::Compare, ConvertCommand::Create, ConvertCommand::Save},
+			{ThresholdCommand::Compare, ThresholdCommand::Create, ThresholdCommand::Save},
 	};
 
 	namespace CommandHelper {

@@ -17,6 +17,10 @@ namespace Pic {
 		return std::regex(R"(\s*load\s+([\w\.\\\/\:]+)\s+([\w]+)\s*)", std::regex_constants::icase);
 	}
 
+	bool LoadCommand::Compare(const std::string &content) {
+		return std::regex_search(content, GetComparer());
+	}
+
 	Command *LoadCommand::Create(const std::string &content) {
 		std::smatch smatch;
 		if(!std::regex_search(content, smatch, GetComparer())) return nullptr;
@@ -42,6 +46,10 @@ namespace Pic {
 
 	std::regex SaveCommand::GetComparer() {
 		return std::regex(R"(\s*save\s+([\w]+)\s+([\w\.\\\/\:]+)\s*)", std::regex_constants::icase);
+	}
+
+	bool SaveCommand::Compare(const std::string &content) {
+		return std::regex_search(content, GetComparer());
 	}
 
 	Command *SaveCommand::Create(const std::string &content) {
@@ -71,6 +79,10 @@ namespace Pic {
 		return std::regex(R"(\s*convert\s+in\s+(Gray|Grey|RGB|RGBA|ARGB|CMJN|HSL|HSLA)\s+(\w+)\s+in\s+(\w+)\s*)", std::regex_constants::icase);
 	}
 
+	bool ConvertCommand::Compare(const std::string &content) {
+		return std::regex_search(content, GetComparer());
+	}
+
 	Command *ConvertCommand::Create(const std::string &content) {
 		std::smatch smatch;
 		if(!std::regex_search(content, smatch, GetComparer())) return nullptr;
@@ -97,6 +109,10 @@ namespace Pic {
 
 	std::regex ThresholdCommand::GetComparer() {
 		return std::regex(R"(\s*threshold\s+(\w+)\s+to\s+([+-]?\d+)\s+in\s+(\w+)\s*)", std::regex_constants::icase);
+	}
+
+	bool ThresholdCommand::Compare(const std::string &content) {
+		return std::regex_search(content, GetComparer());
 	}
 
 	Command *ThresholdCommand::Create(const std::string &content) {
