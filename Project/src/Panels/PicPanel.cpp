@@ -5,6 +5,7 @@
 #include "Panels/PicPanel.hpp"
 #include "Core/FileSystem.hpp"
 #include "Scripting/GeometricCommands.hpp"
+#include "Scripting/LocalCommands.hpp"
 #include <string>
 #include <format>
 #include <imgui.h>
@@ -15,6 +16,7 @@ namespace PC {
 	{
 		Pic::AddBaseCommands(m_Commands);
 		Pic::AddGeometricCommands(m_Commands);
+		Pic::AddLocalCommands(m_Commands);
 	}
 
 	void PicPanel::Update(float dt)
