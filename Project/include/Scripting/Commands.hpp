@@ -24,18 +24,18 @@ namespace Pic {
 	class Command {
 	public:
 		virtual ~Command() = default;
-		virtual bool HasSource() const {return true;}
-		virtual std::string GetSource() const {return {};};
+		[[nodiscard]] virtual bool HasSource() const {return true;}
+		[[nodiscard]] virtual std::string GetSource() const {return {};};
 
-		virtual bool HasTarget() const {return true;}
-		virtual std::string GetTarget() const {return {};};
+		[[nodiscard]] virtual bool HasTarget() const {return true;}
+		[[nodiscard]] virtual std::string GetTarget() const {return {};};
 
-		virtual Image Execute(Image sc) = 0;
+		[[nodiscard]] virtual Image Execute(Image sc) = 0;
 
 //		/// Execute the undo command and/or return the name of the previous state
 //		virtual std::string Undo(StateContainer& sc) = 0;
 
-		virtual std::string ToString() const = 0;
+		[[nodiscard]] virtual std::string ToString() const = 0;
 
 		friend bool operator==(const Command& lft, const Command& rht) {return lft.ToString() == rht.ToString();}
 		friend bool operator!=(const Command& lft, const Command& rht) {return !(lft == rht);}
@@ -55,16 +55,16 @@ namespace Pic {
 	public:
 		LoadCommand(std::filesystem::path path, std::string variable);
 	public:
-		virtual bool HasSource() const override {return false;}
-		virtual std::string GetTarget() const override {return variableStore;}
+		[[nodiscard]] virtual bool HasSource() const override {return false;}
+		[[nodiscard]] virtual std::string GetTarget() const override {return variableStore;}
 
-		virtual Image Execute(Image img) override;
+		[[nodiscard]] virtual Image Execute(Image img) override;
 	public:
-		static std::regex GetComparer();
-		static bool Compare(const std::string& content);
-		static Command* Create(const std::string& content);
-		static std::string Save(const Command* command);
-		virtual std::string ToString() const override {return Save(this);}
+		[[nodiscard]] static std::regex GetComparer();
+		[[nodiscard]] static bool Compare(const std::string& content);
+		[[nodiscard]] static Command* Create(const std::string& content);
+		[[nodiscard]] static std::string Save(const Command* command);
+		[[nodiscard]] virtual std::string ToString() const override {return Save(this);}
 
 	private:
 		std::filesystem::path source;
@@ -76,15 +76,15 @@ namespace Pic {
 	public:
 		SaveCommand(std::string variable, std::filesystem::path path);
 	public:
-		virtual bool HasTarget() const override {return false;}
-		virtual std::string GetSource() const override {return variableSource;}
-		virtual Image Execute(Image img) override;
+		[[nodiscard]] virtual bool HasTarget() const override {return false;}
+		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
+		[[nodiscard]] virtual Image Execute(Image img) override;
 	public:
-		static std::regex GetComparer();
-		static bool Compare(const std::string& content);
-		static Command* Create(const std::string& content);
-		static std::string Save(const Command* command);
-		virtual std::string ToString() const override {return Save(this);}
+		[[nodiscard]] static std::regex GetComparer();
+		[[nodiscard]] static bool Compare(const std::string& content);
+		[[nodiscard]] static Command* Create(const std::string& content);
+		[[nodiscard]] static std::string Save(const Command* command);
+		[[nodiscard]] virtual std::string ToString() const override {return Save(this);}
 	private:
 		std::string variableSource;
 		std::filesystem::path pathTarget;
@@ -95,15 +95,15 @@ namespace Pic {
 	public:
 		ConvertCommand(std::string variableSource, std::string variableTarget, ModelType conversionModel);
 	public:
-		virtual std::string GetSource() const override {return variableSource;}
-		virtual std::string GetTarget() const override {return variableTarget;}
-		virtual Image Execute(Image img) override;
+		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
+		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
+		[[nodiscard]] virtual Image Execute(Image img) override;
 	public:
-		static std::regex GetComparer();
-		static bool Compare(const std::string& content);
-		static Command* Create(const std::string& content);
-		static std::string Save(const Command* command);
-		virtual std::string ToString() const override {return Save(this);}
+		[[nodiscard]] static std::regex GetComparer();
+		[[nodiscard]] static bool Compare(const std::string& content);
+		[[nodiscard]] static Command* Create(const std::string& content);
+		[[nodiscard]] static std::string Save(const Command* command);
+		[[nodiscard]] virtual std::string ToString() const override {return Save(this);}
 	private:
 		std::string variableSource;
 		std::string variableTarget;
@@ -115,15 +115,15 @@ namespace Pic {
 	public:
 		ThresholdCommand(std::string variableSource, std::string variableTarget, int64_t threshold);
 	public:
-		virtual std::string GetSource() const override {return variableSource;}
-		virtual std::string GetTarget() const override {return variableTarget;}
-		virtual Image Execute(Image img) override;
+		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
+		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
+		[[nodiscard]] virtual Image Execute(Image img) override;
 	public:
-		static std::regex GetComparer();
-		static bool Compare(const std::string& content);
-		static Command* Create(const std::string& content);
-		static std::string Save(const Command* command);
-		virtual std::string ToString() const override {return Save(this);}
+		[[nodiscard]] static std::regex GetComparer();
+		[[nodiscard]] static bool Compare(const std::string& content);
+		[[nodiscard]] static Command* Create(const std::string& content);
+		[[nodiscard]] static std::string Save(const Command* command);
+		[[nodiscard]] virtual std::string ToString() const override {return Save(this);}
 	private:
 		std::string variableSource;
 		std::string variableTarget;

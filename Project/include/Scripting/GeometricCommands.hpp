@@ -10,15 +10,18 @@
 namespace Pic {
 	class FlipHorizontalCommand : public Command {
 	public:
-		virtual std::string GetSource() const override {return variableSource;}
-		virtual std::string GetTarget() const override {return variableTarget;}
-		virtual Image Execute(Image img) override;
+		FlipHorizontalCommand(std::string variableSrc, std::string variableTrg);
+		virtual ~FlipHorizontalCommand() = default;
 	public:
-		static std::regex GetComparer();
-		static bool Compare(const std::string& content);
-		static Command* Create(const std::string& content);
-		static std::string Save(const Command* command);
-		virtual std::string ToString() const override {return Save(this);}
+		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
+		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
+		[[nodiscard]] virtual Image Execute(Image img) override;
+	public:
+		[[nodiscard]] static std::regex GetComparer();
+		[[nodiscard]] static bool Compare(const std::string& content);
+		[[nodiscard]] static Command* Create(const std::string& content);
+		[[nodiscard]] static std::string Save(const Command* command);
+		[[nodiscard]] virtual std::string ToString() const override {return Save(this);}
 	private:
 		std::string variableSource, variableTarget;
 	//(const Image& img);
@@ -27,15 +30,18 @@ namespace Pic {
 
 	class FlipVerticalCommand : public Command {
 	public:
-		virtual std::string GetSource() const override {return variableSource;}
-		virtual std::string GetTarget() const override {return variableTarget;}
-		virtual Image Execute(Image img) override;
+		FlipVerticalCommand(std::string variableSrc, std::string variableTrg);
+		virtual ~FlipVerticalCommand() = default;
 	public:
-		static std::regex GetComparer();
-		static bool Compare(const std::string& content);
-		static Command* Create(const std::string& content);
-		static std::string Save(const Command* command);
-		virtual std::string ToString() const override {return Save(this);}
+		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
+		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
+		[[nodiscard]] virtual Image Execute(Image img) override;
+	public:
+		[[nodiscard]] static std::regex GetComparer();
+		[[nodiscard]] static bool Compare(const std::string& content);
+		[[nodiscard]] static Command* Create(const std::string& content);
+		[[nodiscard]] static std::string Save(const Command* command);
+		[[nodiscard]] virtual std::string ToString() const override {return Save(this);}
 	private:
 		std::string variableSource, variableTarget;
 	//(const Image& img);
@@ -44,15 +50,18 @@ namespace Pic {
 
 	class Rotate90Command : public Command {
 	public:
-		virtual std::string GetSource() const override {return variableSource;}
-		virtual std::string GetTarget() const override {return variableTarget;}
-		virtual Image Execute(Image img) override;
+		Rotate90Command(std::string variableSrc, std::string variableTrg);
+		virtual ~Rotate90Command() = default;
 	public:
-		static std::regex GetComparer();
-		static bool Compare(const std::string& content);
-		static Command* Create(const std::string& content);
-		static std::string Save(const Command* command);
-		virtual std::string ToString() const override {return Save(this);}
+		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
+		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
+		[[nodiscard]] virtual Image Execute(Image img) override;
+	public:
+		[[nodiscard]] static std::regex GetComparer();
+		[[nodiscard]] static bool Compare(const std::string& content);
+		[[nodiscard]] static Command* Create(const std::string& content);
+		[[nodiscard]] static std::string Save(const Command* command);
+		[[nodiscard]] virtual std::string ToString() const override {return Save(this);}
 	private:
 		std::string variableSource, variableTarget;
 	//(const Image& img);
@@ -61,15 +70,18 @@ namespace Pic {
 
 	class CropCommand : public Command {
 	public:
-		virtual std::string GetSource() const override {return variableSource;}
-		virtual std::string GetTarget() const override {return variableTarget;}
-		virtual Image Execute(Image img) override;
+		CropCommand(std::string variableSrc, std::string variableTrg, uint32_t top, uint32_t left, uint32_t bottom, uint32_t right);
+		virtual ~CropCommand() = default;
 	public:
-		static std::regex GetComparer();
-		static bool Compare(const std::string& content);
-		static Command* Create(const std::string& content);
-		static std::string Save(const Command* command);
-		virtual std::string ToString() const override {return Save(this);}
+		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
+		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
+		[[nodiscard]] virtual Image Execute(Image img) override;
+	public:
+		[[nodiscard]] static std::regex GetComparer();
+		[[nodiscard]] static bool Compare(const std::string& content);
+		[[nodiscard]] static Command* Create(const std::string& content);
+		[[nodiscard]] static std::string Save(const Command* command);
+		[[nodiscard]] virtual std::string ToString() const override {return Save(this);}
 	private:
 		std::string variableSource, variableTarget;
 		uint32_t top, left, bottom, right;
@@ -79,15 +91,18 @@ namespace Pic {
 
 	class TranslateCommand : public Command {
 	public:
-		virtual std::string GetSource() const override {return variableSource;}
-		virtual std::string GetTarget() const override {return variableTarget;}
-		virtual Image Execute(Image img) override;
+		TranslateCommand(std::string variableSrc, std::string variableTrg, uint32_t decalX, uint32_t decalY);
+		virtual ~TranslateCommand() = default;
 	public:
-		static std::regex GetComparer();
-		static bool Compare(const std::string& content);
-		static Command* Create(const std::string& content);
-		static std::string Save(const Command* command);
-		virtual std::string ToString() const override {return Save(this);}
+		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
+		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
+		[[nodiscard]] virtual Image Execute(Image img) override;
+	public:
+		[[nodiscard]] static std::regex GetComparer();
+		[[nodiscard]] static bool Compare(const std::string& content);
+		[[nodiscard]] static Command* Create(const std::string& content);
+		[[nodiscard]] static std::string Save(const Command* command);
+		[[nodiscard]] virtual std::string ToString() const override {return Save(this);}
 	private:
 		std::string variableSource, variableTarget;
 		uint32_t decalX, decalY;
@@ -96,15 +111,18 @@ namespace Pic {
 
 	class ResizeCommand : public Command {
 	public:
-		virtual std::string GetSource() const override {return variableSource;}
-		virtual std::string GetTarget() const override {return variableTarget;}
-		virtual Image Execute(Image img) override;
+		ResizeCommand(std::string variableSrc, std::string variableTrg, uint32_t newWidth, uint32_t newHeight);
+		virtual ~ResizeCommand() = default;
 	public:
-		static std::regex GetComparer();
-		static bool Compare(const std::string& content);
-		static Command* Create(const std::string& content);
-		static std::string Save(const Command* command);
-		virtual std::string ToString() const override {return Save(this);}
+		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
+		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
+		[[nodiscard]] virtual Image Execute(Image img) override;
+	public:
+		[[nodiscard]] static std::regex GetComparer();
+		[[nodiscard]] static bool Compare(const std::string& content);
+		[[nodiscard]] static Command* Create(const std::string& content);
+		[[nodiscard]] static std::string Save(const Command* command);
+		[[nodiscard]] virtual std::string ToString() const override {return Save(this);}
 	private:
 		std::string variableSource, variableTarget;
 		uint32_t newWidth, newHeight;
@@ -113,15 +131,18 @@ namespace Pic {
 
 	class ShearCommand : public Command {
 	public:
-		virtual std::string GetSource() const override {return variableSource;}
-		virtual std::string GetTarget() const override {return variableTarget;}
-		virtual Image Execute(Image img) override;
+		ShearCommand(std::string variableSrc, std::string variableTrg, uint32_t decalX, uint32_t decalY);
+		virtual ~ShearCommand() = default;
 	public:
-		static std::regex GetComparer();
-		static bool Compare(const std::string& content);
-		static Command* Create(const std::string& content);
-		static std::string Save(const Command* command);
-		virtual std::string ToString() const override {return Save(this);}
+		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
+		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
+		[[nodiscard]] virtual Image Execute(Image img) override;
+	public:
+		[[nodiscard]] static std::regex GetComparer();
+		[[nodiscard]] static bool Compare(const std::string& content);
+		[[nodiscard]] static Command* Create(const std::string& content);
+		[[nodiscard]] static std::string Save(const Command* command);
+		[[nodiscard]] virtual std::string ToString() const override {return Save(this);}
 	private:
 		std::string variableSource, variableTarget;
 		uint32_t decalX, decalY;
@@ -130,15 +151,18 @@ namespace Pic {
 
 	class RotateCommand : public Command {
 	public:
-		virtual std::string GetSource() const override {return variableSource;}
-		virtual std::string GetTarget() const override {return variableTarget;}
-		virtual Image Execute(Image img) override;
+		RotateCommand(std::string variableSrc, std::string variableTrg, float angleDegree, uint32_t centerX, uint32_t centerY);
+		virtual ~RotateCommand() = default;
 	public:
-		static std::regex GetComparer();
-		static bool Compare(const std::string& content);
-		static Command* Create(const std::string& content);
-		static std::string Save(const Command* command);
-		virtual std::string ToString() const override {return Save(this);}
+		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
+		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
+		[[nodiscard]] virtual Image Execute(Image img) override;
+	public:
+		[[nodiscard]] static std::regex GetComparer();
+		[[nodiscard]] static bool Compare(const std::string& content);
+		[[nodiscard]] static Command* Create(const std::string& content);
+		[[nodiscard]] static std::string Save(const Command* command);
+		[[nodiscard]] virtual std::string ToString() const override {return Save(this);}
 	private:
 		std::string variableSource, variableTarget;
 		float angleDegree;
@@ -148,16 +172,20 @@ namespace Pic {
 
 	class RemapCommand : public Command {
 	public:
-		virtual std::string GetSource() const override {return variableSource;}
-		virtual std::string GetTarget() const override {return variableTarget;}
-		virtual Image Execute(Image img) override;
+		RemapCommand(std::string variableSrc, std::string variableTrg, std::vector<Vec2UI> remap);
+		virtual ~RemapCommand() = default;
 	public:
-		static std::regex GetComparer();
-		static bool Compare(const std::string& content);
-		static Command* Create(const std::string& content);
-		static std::string Save(const Command* command);
-		virtual std::string ToString() const override {return Save(this);}
+		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
+		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
+		[[nodiscard]] virtual Image Execute(Image img) override;
+	public:
+		[[nodiscard]] static std::regex GetComparer();
+		[[nodiscard]] static bool Compare(const std::string& content);
+		[[nodiscard]] static Command* Create(const std::string& content);
+		[[nodiscard]] static std::string Save(const Command* command);
+		[[nodiscard]] virtual std::string ToString() const override {return Save(this);}
 	private:
+		std::string ArrayToString() const;
 		std::string variableSource, variableTarget;
 		std::vector<Vec2UI> remap;
 	};
@@ -165,15 +193,18 @@ namespace Pic {
 
 	class ZoomCommand : public Command {
 	public:
-		virtual std::string GetSource() const override {return variableSource;}
-		virtual std::string GetTarget() const override {return variableTarget;}
-		virtual Image Execute(Image img) override;
+		ZoomCommand(std::string variableSrc, std::string variableTrg, float factor);
+		virtual ~ZoomCommand() = default;
 	public:
-		static std::regex GetComparer();
-		static bool Compare(const std::string& content);
-		static Command* Create(const std::string& content);
-		static std::string Save(const Command* command);
-		virtual std::string ToString() const override {return Save(this);}
+		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
+		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
+		[[nodiscard]] virtual Image Execute(Image img) override;
+	public:
+		[[nodiscard]] static std::regex GetComparer();
+		[[nodiscard]] static bool Compare(const std::string& content);
+		[[nodiscard]] static Command* Create(const std::string& content);
+		[[nodiscard]] static std::string Save(const Command* command);
+		[[nodiscard]] virtual std::string ToString() const override {return Save(this);}
 	private:
 		std::string variableSource, variableTarget;
 		float factor;

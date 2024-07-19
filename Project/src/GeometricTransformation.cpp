@@ -30,7 +30,7 @@ namespace GeometricTransformation {
 	Image Rotate(const Image &img, float angleDegree, uint32_t centerX, uint32_t centerY) {
 		return Image();
 	}
-	Image Remap(const Image &img, std::vector<Vec2UI> remap) {
+	Image Remap(const Image &img, const std::vector<Vec2UI>& remap) {
 		return Image();
 	}
 	Image Zoom(const Image &img, float factor) {

@@ -14,13 +14,8 @@
 #include <cstdint>
 
 #include "Core/Buffer.hpp"
+#include "Core/Math.hpp"
 #include "OpenGL/TextureSpecification.hpp"
-
-struct Vec2UI
-{
-	uint32_t x;
-	uint32_t y;
-};
 
 enum class ModelType
 {
