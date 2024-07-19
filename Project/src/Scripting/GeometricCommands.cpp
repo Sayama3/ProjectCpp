@@ -76,12 +76,12 @@ namespace Pic {
 	}
 
 	// ==================== ShearCommand ==================== //
-	ShearCommand::ShearCommand(std::string variableSrc, std::string variableTrg, uint32_t decalX, uint32_t decalY) : variableSource(std::move(variableSrc)), variableTarget(std::move(variableTrg)), decalX(decalX), decalY(decalY) {}
+	ShearCommand::ShearCommand(std::string variableSrc, std::string variableTrg, float decalX, float decalY) : variableSource(std::move(variableSrc)), variableTarget(std::move(variableTrg)), decalX(decalX), decalY(decalY) {}
 	Image ShearCommand::Execute(const Image& img) {
 		return Shear(img, decalX, decalY);
 	}
 	std::regex ShearCommand::GetComparer() {
-		return std::regex(R"(\s*shear\s+(\d+)\s+(\d+)\s+(\w+)\s+in\s+(\w+)\s*)", std::regex_constants::icase);
+		return std::regex(R"(\s*shear\s+((?:(?:\.\d+)|(?:\d+(?:\.\d*)?)))\s+((?:(?:\.\d+)|(?:\d+(?:\.\d*)?)))\s+(\w+)\s+in\s+(\w+)\s*)", std::regex_constants::icase);
 	}
 	bool ShearCommand::Compare(const std::string &content) {
 		return std::regex_search(content, GetComparer());
@@ -89,7 +89,7 @@ namespace Pic {
 	Command *ShearCommand::Create(const std::string &content) {
 		std::smatch smatch;
 		if(!std::regex_search(content, smatch, GetComparer())) return nullptr;
-		return new ShearCommand(smatch[3], smatch[4], std::stoll(smatch[1]), std::stoll(smatch[2]));
+		return new ShearCommand(smatch[3], smatch[4], std::stof(smatch[1]), std::stof(smatch[2]));
 	}
 	std::string ShearCommand::Save(const Command* command) {
 		const auto* c = dynamic_cast<const ShearCommand*>(command);

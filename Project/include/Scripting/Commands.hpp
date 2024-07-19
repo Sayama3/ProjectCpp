@@ -55,7 +55,7 @@ namespace Pic {
 	class LoadCommand : public Command
 	{
 	public:
-		LoadCommand(std::filesystem::path path, std::string variable);
+		explicit LoadCommand(std::filesystem::path path, std::string variable);
 	public:
 		[[nodiscard]] virtual bool HasSource() const override {return false;}
 		[[nodiscard]] virtual std::string GetTarget() const override {return variableStore;}
@@ -76,8 +76,9 @@ namespace Pic {
 	class SaveCommand : public Command
 	{
 	public:
-		SaveCommand(std::string variable, std::filesystem::path path);
+		explicit SaveCommand(std::string variable, std::filesystem::path path);
 	public:
+		[[nodiscard]] virtual bool HasSource() const override {return true;}
 		[[nodiscard]] virtual bool HasTarget() const override {return false;}
 		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
 		[[nodiscard]] virtual Image Execute(const Image& img) override;

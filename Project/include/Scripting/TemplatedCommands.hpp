@@ -6,6 +6,10 @@
 
 #include "Commands.hpp"
 
+#define PC_FLOAT_REG R"(((?:(?:\.\d+)|(?:\d+(?:\.\d*)?))))"
+#define PC_INT_REG R"(([-+]?\d+))"
+#define PC_UINT_REG R"((\d+))"
+
 namespace Pic {
 
 	template<class Self, typename T>
@@ -42,8 +46,8 @@ namespace Pic {
 
 	public:
 		[[nodiscard]] static std::regex GetComparer() {
-			std::string regex = std::format(R"(\s*{}\s+(\w+)\s+in\s+(\w+)\s*)", Self::GetCommandName());
-			auto reg = std::regex(regex, std::regex_constants::icase);
+			static std::string regex = std::format(R"(\s*{}\s+(\w+)\s+in\s+(\w+)\s*)", Self::GetCommandName());
+			static auto reg = std::regex(regex, std::regex_constants::icase);
 			return reg;
 		}
 		[[nodiscard]] static bool Compare(const std::string &content) { return std::regex_search(content, Self::GetComparer()); }
@@ -68,8 +72,8 @@ namespace Pic {
 	public:
 		IntCommand(std::string variableSrc, std::string variableTrg, int value) : TCommand<Self, int>(variableSrc, variableTrg, value) {}
 		[[nodiscard]] static std::regex GetComparer() {
-			std::string regex = std::format(R"(\s*{}\s+([-+]?\d+)\s+(\w+)\s+in\s+(\w+)\s*)", Self::GetCommandName());
-			auto reg = std::regex(regex, std::regex_constants::icase);
+			static std::string regex = std::format(R"(\s*{}\s+([-+]?\d+)\s+(\w+)\s+in\s+(\w+)\s*)", Self::GetCommandName());
+			static auto reg = std::regex(regex, std::regex_constants::icase);
 			return reg;
 		}
 		static int StringToValue(const std::string &value) { return std::stoi(value); }
@@ -80,8 +84,8 @@ namespace Pic {
 	public:
 		FloatCommand(std::string variableSrc, std::string variableTrg, float value) : TCommand<Self, float>(variableSrc, variableTrg, value) {}
 		[[nodiscard]] static std::regex GetComparer() {
-			std::string regex = std::format(R"(\s*{}\s+((?:(?:\.\d+)|(?:\d+(?:\.\d*)?)))\s+(\w+)\s+in\s+(\w+)\s*)", Self::GetCommandName());
-			auto reg = std::regex(regex, std::regex_constants::icase);
+			static std::string regex = std::format(R"(\s*{}\s+((?:(?:\.\d+)|(?:\d+(?:\.\d*)?)))\s+(\w+)\s+in\s+(\w+)\s*)", Self::GetCommandName());
+			static auto reg = std::regex(regex, std::regex_constants::icase);
 			return reg;
 		}
 		static float StringToValue(const std::string &value) { return std::stof(value); }

@@ -93,7 +93,7 @@ namespace Pic {
 
 	class ShearCommand : public Command {
 	public:
-		ShearCommand(std::string variableSrc, std::string variableTrg, uint32_t decalX, uint32_t decalY);
+		ShearCommand(std::string variableSrc, std::string variableTrg, float decalX, float decalY);
 		virtual ~ShearCommand() = default;
 	public:
 		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
@@ -107,7 +107,7 @@ namespace Pic {
 		[[nodiscard]] virtual std::string ToString() const override {return Save(this);}
 	private:
 		std::string variableSource, variableTarget;
-		uint32_t decalX, decalY;
+		float decalX, decalY;
 	};
 
 

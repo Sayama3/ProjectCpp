@@ -14,7 +14,7 @@ namespace Pic {
 	}
 
 	std::regex LoadCommand::GetComparer() {
-		return std::regex(R"(\s*load\s+([\w\.\\\/\:]+)\s+([\w]+)\s*)", std::regex_constants::icase);
+		return std::regex(R"(\s*load\s+([\w\.\\\/\:]+)\s+in\s+([\w]+)\s*)", std::regex_constants::icase);
 	}
 
 	bool LoadCommand::Compare(const std::string &content) {
@@ -24,7 +24,7 @@ namespace Pic {
 	Command *LoadCommand::Create(const std::string &content) {
 		std::smatch smatch;
 		if(!std::regex_search(content, smatch, GetComparer())) return nullptr;
-		std::string path = smatch[1];
+		std::filesystem::path path = std::string(smatch[1]);
 		std::string variable = smatch[2];
 		return new LoadCommand(path, variable);
 	}
@@ -32,7 +32,7 @@ namespace Pic {
 	std::string LoadCommand::Save(const Command *command) {
 		const LoadCommand* load = dynamic_cast<const LoadCommand*>(command);
 		if(!load) return "";
-		return std::format("load {} {}", load->source.string(), load->variableStore);
+		return std::format("load {} in {}", load->source.string(), load->variableStore);
 	}
 
 	SaveCommand::SaveCommand(std::string variable, std::filesystem::path path) : variableSource(std::move(variable)), pathTarget(std::move(path)) {
@@ -45,7 +45,7 @@ namespace Pic {
 	}
 
 	std::regex SaveCommand::GetComparer() {
-		return std::regex(R"(\s*save\s+([\w]+)\s+([\w\.\\\/\:]+)\s*)", std::regex_constants::icase);
+		return std::regex(R"(\s*save\s+([\w]+)\s+in\s+([\w\.\\\/\:]+)\s*)", std::regex_constants::icase);
 	}
 
 	bool SaveCommand::Compare(const std::string &content) {
@@ -56,8 +56,8 @@ namespace Pic {
 		std::smatch smatch;
 		if(!std::regex_search(content, smatch, GetComparer())) return nullptr;
 		std::string variable = smatch[1];
-		std::string path = smatch[2];
-		return new SaveCommand(path, variable);
+		std::filesystem::path path = std::string(smatch[2]);
+		return new SaveCommand(variable, path);
 	}
 
 	std::string SaveCommand::Save(const Command *command) {

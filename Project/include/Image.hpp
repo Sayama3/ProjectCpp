@@ -255,14 +255,14 @@ public:
     friend Image operator!=(Image lft, uint8_t ceil) { return (lft<ceil)+(lft>ceil);}
     friend Image operator==(Image lft, uint8_t ceil) {return ~(lft!=ceil);}
 
-private:
-	void UpdateImage();
-
+public:
 	[[nodiscard]] uint32_t GetIndex(uint32_t x, uint32_t y) const;
 	[[nodiscard]] uint32_t GetIndex(Vec2UI pos) const;
 	[[nodiscard]] Vec2UI GetPosition(uint32_t index) const;
 	[[nodiscard]] bool IsInside(uint32_t x, uint32_t y) const;
 	[[nodiscard]] bool IsInside(uint32_t x, uint32_t y, uint32_t channel) const;
+private:
+	void UpdateImage();
 
 
 	uint32_t m_Width;
