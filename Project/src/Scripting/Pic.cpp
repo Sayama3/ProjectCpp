@@ -15,7 +15,7 @@ namespace Pic {
 	{
 		State state;
 		state.commandStr = std::move(command);
-		state.command.reset(CommandHelper::GetCommand(state.commandStr));
+		state.command.reset(CommandHelper::GetCommand(Commands, state.commandStr));
 		if(state) {
 			States.push_back(std::move(state));
 		} else {
@@ -33,12 +33,13 @@ namespace Pic {
 			PC_WARNING("No command has been given.");
 		}
 	}
+	Pic::Pic(std::vector<CommandCreator> commands) : Commands(std::move(commands)) {}
 
-	Pic::Pic(const std::filesystem::path &path) : Pic(FS::ReadTextInFile(path))
+	Pic::Pic(std::vector<CommandCreator> commands, const std::filesystem::path &path) : Pic(std::move(commands), FS::ReadTextInFile(path))
 	{
 	}
 
-	Pic::Pic(const std::string& input)
+	Pic::Pic(std::vector<CommandCreator> commands, const std::string& input) :  Commands(std::move(commands))
 	{
 		std::string result;
 		std::istringstream iss(input);
@@ -57,12 +58,12 @@ namespace Pic {
 		}
 		return std::move(str);
 	}
-	void Pic::UpdateCommand(uint64_t index){States[index].UpdateCommandFromString();}
+	void Pic::UpdateCommand(uint64_t index){States[index].UpdateCommandFromString(Commands);}
 
 	void Pic::Execute(uint64_t offset) {
 		for (int i = offset; i < States.size(); ++i) {
 			auto& state = States[i];
-			if(!state.command) state.UpdateCommandFromString();
+			if(!state.command) state.UpdateCommandFromString(Commands);
 			if(!state.command) continue;
 
 			const Image* imgPtr = state.command->HasSource() ? GetImage(state.command->GetSource(), i) : nullptr;

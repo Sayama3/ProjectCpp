@@ -29,6 +29,7 @@ namespace PC {
 	private:
 		static inline uint64_t s_Count{0};
 		std::unordered_map<uint64_t, Pic::Pic> m_States;
+		std::vector<Pic::CommandCreator> m_Commands;
 	};
 
 }// namespace PC

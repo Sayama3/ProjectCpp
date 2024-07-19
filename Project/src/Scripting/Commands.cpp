@@ -9,7 +9,7 @@ namespace Pic {
 	LoadCommand::LoadCommand(std::filesystem::path path, std::string variable) : source(std::move(path)), variableStore(std::move(variable)) {
 	}
 
-	Image LoadCommand::Execute(Image img) {
+	Image LoadCommand::Execute(const Image& img) {
 		return Image(source);
 	}
 
@@ -38,7 +38,7 @@ namespace Pic {
 	SaveCommand::SaveCommand(std::string variable, std::filesystem::path path) : variableSource(std::move(variable)), pathTarget(std::move(path)) {
 	}
 
-	Image SaveCommand::Execute(Image img) {
+	Image SaveCommand::Execute(const Image& img) {
 		auto path = this->pathTarget.string();
 		stbi_write_png(path.c_str(), img.GetWidth(), img.GetHeight(), img.GetChannels(), &img(0,0,0), img.GetWidth() * img.GetChannels());
 		return std::move(img);
@@ -70,9 +70,10 @@ namespace Pic {
 	ConvertCommand::ConvertCommand(std::string variableSource, std::string variableTarget, ModelType conversionModel) : variableSource(std::move(variableSource)), variableTarget(std::move(variableTarget)), conversionModel(conversionModel) {
 	}
 
-	Image ConvertCommand::Execute(Image img) {
-		img.ConvertImageToModelType(conversionModel);
-		return std::move(img);
+	Image ConvertCommand::Execute(const Image& img) {
+		Image result(img);
+		result.ConvertImageToModelType(conversionModel);
+		return std::move(result);
 	}
 
 	std::regex ConvertCommand::GetComparer() {
@@ -101,7 +102,8 @@ namespace Pic {
 	ThresholdCommand::ThresholdCommand(std::string variableSource, std::string variableTarget, int64_t threshold) : variableSource(std::move(variableSource)), variableTarget(std::move(variableTarget)), threshold(threshold) {
 	}
 
-	Image ThresholdCommand::Execute(Image img) {
+	Image ThresholdCommand::Execute(const Image& image) {
+		Image img(image);
 		img.SetWidth(img.GetWidth() + threshold);
 		img.SetHeight(img.GetHeight() + threshold);
 		return std::move(img);
@@ -130,8 +132,8 @@ namespace Pic {
 		return std::format("threshold {} to {} in {}", threshold->variableSource, threshold->threshold, threshold->variableTarget);
 	}
 
-	Command *CommandHelper::GetCommand(const std::string &str) {
-		for(auto& [checker, loader, saver] : s_Command)
+	Command *CommandHelper::GetCommand(const std::vector<CommandCreator>& commands, const std::string &str) {
+		for(auto& [checker, loader, saver] : commands)
 		{
 			if(!loader) continue;
 			auto* command = loader(str);

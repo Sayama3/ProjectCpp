@@ -57,6 +57,7 @@ set(SRC src/main.cpp
         include/Core/Math.hpp
         src/Scripting/GeometricCommands.cpp
         include/Scripting/GeometricCommands.hpp
+        include/Scripting/TemplatedCommands.hpp
 )
 
 add_executable(${EXE_TARGET_NAME} ${SRC})

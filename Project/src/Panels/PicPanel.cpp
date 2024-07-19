@@ -4,6 +4,7 @@
 
 #include "Panels/PicPanel.hpp"
 #include "Core/FileSystem.hpp"
+#include "Scripting/GeometricCommands.hpp"
 #include <string>
 #include <format>
 #include <imgui.h>
@@ -12,7 +13,8 @@
 namespace PC {
 	void PicPanel::Begin()
 	{
-
+		Pic::AddBaseCommands(m_Commands);
+		Pic::AddGeometricCommands(m_Commands);
 	}
 
 	void PicPanel::Update(float dt)
@@ -55,12 +57,12 @@ namespace PC {
 				//TODO: Search for a file a load if found.
 				std::string str;
 //				FS::ReadTextInFile(p,str);
-				::Pic::Pic sc(str);
+				::Pic::Pic sc(m_Commands, str);
 				AddState(std::move(sc));
 			}
 
 			if(ImGui::Button("New Pic")) {
-				AddState({});
+				AddState({m_Commands});
 			}
 		}
 		ImGui::End();
@@ -84,7 +86,7 @@ namespace PC {
 				ImGui::PopID();
 
 				if(!textChanged) continue;
-				auto* command = Pic::CommandHelper::GetCommand(state.States[i].commandStr);
+				auto* command = Pic::CommandHelper::GetCommand(m_Commands, state.States[i].commandStr);
 				if(command) {
 					state.States[i].command.reset(command);
 					if(index == -1) index = i;
@@ -96,7 +98,7 @@ namespace PC {
 				static std::string commandStr;
 				ImGui::InputText("##NewState", &commandStr);
 				if(ImGui::Button("Add New Line")) {
-					auto* command = Pic::CommandHelper::GetCommand(commandStr);
+					auto* command = Pic::CommandHelper::GetCommand(m_Commands, commandStr);
 					if(command) {
 						if(index == -1) index = state.States.size();
 						state.AddCommand(std::unique_ptr<Pic::Command>(command));

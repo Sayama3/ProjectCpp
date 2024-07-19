@@ -20,6 +20,8 @@
 
 //TODO: Implement a Command Pattern to describe and represent the change of the Image as we interact with it.
 
+#define PC_COMMAND_CREATOR(CLASS) {CLASS::Compare, CLASS::Create, CLASS::Save}
+
 namespace Pic {
 	class Command {
 	public:
@@ -30,7 +32,7 @@ namespace Pic {
 		[[nodiscard]] virtual bool HasTarget() const {return true;}
 		[[nodiscard]] virtual std::string GetTarget() const {return {};};
 
-		[[nodiscard]] virtual Image Execute(Image sc) = 0;
+		[[nodiscard]] virtual Image Execute(const Image& sc) = 0;
 
 //		/// Execute the undo command and/or return the name of the previous state
 //		virtual std::string Undo(StateContainer& sc) = 0;
@@ -58,7 +60,7 @@ namespace Pic {
 		[[nodiscard]] virtual bool HasSource() const override {return false;}
 		[[nodiscard]] virtual std::string GetTarget() const override {return variableStore;}
 
-		[[nodiscard]] virtual Image Execute(Image img) override;
+		[[nodiscard]] virtual Image Execute(const Image& img) override;
 	public:
 		[[nodiscard]] static std::regex GetComparer();
 		[[nodiscard]] static bool Compare(const std::string& content);
@@ -78,7 +80,7 @@ namespace Pic {
 	public:
 		[[nodiscard]] virtual bool HasTarget() const override {return false;}
 		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
-		[[nodiscard]] virtual Image Execute(Image img) override;
+		[[nodiscard]] virtual Image Execute(const Image& img) override;
 	public:
 		[[nodiscard]] static std::regex GetComparer();
 		[[nodiscard]] static bool Compare(const std::string& content);
@@ -97,7 +99,7 @@ namespace Pic {
 	public:
 		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
 		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
-		[[nodiscard]] virtual Image Execute(Image img) override;
+		[[nodiscard]] virtual Image Execute(const Image& img) override;
 	public:
 		[[nodiscard]] static std::regex GetComparer();
 		[[nodiscard]] static bool Compare(const std::string& content);
@@ -117,7 +119,7 @@ namespace Pic {
 	public:
 		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
 		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
-		[[nodiscard]] virtual Image Execute(Image img) override;
+		[[nodiscard]] virtual Image Execute(const Image& img) override;
 	public:
 		[[nodiscard]] static std::regex GetComparer();
 		[[nodiscard]] static bool Compare(const std::string& content);
@@ -130,15 +132,18 @@ namespace Pic {
 		int64_t threshold;
 	};
 
-	static inline std::vector<CommandCreator> s_Command {
-			{LoadCommand::Compare, LoadCommand::Create, LoadCommand::Save},
-			{SaveCommand::Compare, SaveCommand::Create, SaveCommand::Save},
-			{ConvertCommand::Compare, ConvertCommand::Create, ConvertCommand::Save},
-			{ThresholdCommand::Compare, ThresholdCommand::Create, ThresholdCommand::Save},
-	};
+	/// Function to add all the geometrics Commands to the list of command
+	static inline void AddBaseCommands(std::vector<CommandCreator>& commands) {
+		commands.insert(commands.end(), {
+				PC_COMMAND_CREATOR(LoadCommand),
+				PC_COMMAND_CREATOR(SaveCommand),
+				PC_COMMAND_CREATOR(ConvertCommand),
+				PC_COMMAND_CREATOR(ThresholdCommand),
+		});
+	}
 
 	namespace CommandHelper {
-		Command* GetCommand(const std::string& str);
+		Command* GetCommand(const std::vector<CommandCreator>& commands, const std::string& str);
 	}
 
 }

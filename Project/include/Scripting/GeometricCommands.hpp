@@ -5,66 +5,28 @@
 #pragma once
 
 #include "Commands.hpp"
+#include "TemplatedCommands.hpp"
 #include "GeometricTransformation.hpp"
 
 namespace Pic {
-	class FlipHorizontalCommand : public Command {
-	public:
-		FlipHorizontalCommand(std::string variableSrc, std::string variableTrg);
-		virtual ~FlipHorizontalCommand() = default;
-	public:
-		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
-		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
-		[[nodiscard]] virtual Image Execute(Image img) override;
-	public:
-		[[nodiscard]] static std::regex GetComparer();
-		[[nodiscard]] static bool Compare(const std::string& content);
-		[[nodiscard]] static Command* Create(const std::string& content);
-		[[nodiscard]] static std::string Save(const Command* command);
-		[[nodiscard]] virtual std::string ToString() const override {return Save(this);}
-	private:
-		std::string variableSource, variableTarget;
-	//(const Image& img);
+	class FlipHorizontalCommand : public TCommandNoParam<FlipHorizontalCommand>
+	{
+		PC_IMPL_NO_PARAM_COMMAND(FlipHorizontalCommand, GeometricTransformation::FlipHorizontal, "flip horizontal");
 	};
 
-
-	class FlipVerticalCommand : public Command {
-	public:
-		FlipVerticalCommand(std::string variableSrc, std::string variableTrg);
-		virtual ~FlipVerticalCommand() = default;
-	public:
-		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
-		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
-		[[nodiscard]] virtual Image Execute(Image img) override;
-	public:
-		[[nodiscard]] static std::regex GetComparer();
-		[[nodiscard]] static bool Compare(const std::string& content);
-		[[nodiscard]] static Command* Create(const std::string& content);
-		[[nodiscard]] static std::string Save(const Command* command);
-		[[nodiscard]] virtual std::string ToString() const override {return Save(this);}
-	private:
-		std::string variableSource, variableTarget;
-	//(const Image& img);
+	class FlipVerticalCommand : public TCommandNoParam<FlipVerticalCommand>
+	{
+		PC_IMPL_NO_PARAM_COMMAND(FlipVerticalCommand, GeometricTransformation::FlipVertical, "flip vertical");
 	};
 
+	class ZoomCommand : public FloatCommand<ZoomCommand>
+	{
+		PC_IMPL_FLT_COMMAND(ZoomCommand,::GeometricTransformation::Zoom, "zoom")
+	};
 
-	class Rotate90Command : public Command {
-	public:
-		Rotate90Command(std::string variableSrc, std::string variableTrg);
-		virtual ~Rotate90Command() = default;
-	public:
-		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
-		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
-		[[nodiscard]] virtual Image Execute(Image img) override;
-	public:
-		[[nodiscard]] static std::regex GetComparer();
-		[[nodiscard]] static bool Compare(const std::string& content);
-		[[nodiscard]] static Command* Create(const std::string& content);
-		[[nodiscard]] static std::string Save(const Command* command);
-		[[nodiscard]] virtual std::string ToString() const override {return Save(this);}
-	private:
-		std::string variableSource, variableTarget;
-	//(const Image& img);
+	class Rotate90Command : public TCommandNoParam<Rotate90Command>
+	{
+		PC_IMPL_NO_PARAM_COMMAND(Rotate90Command,::GeometricTransformation::Rotate90, "rotate90")
 	};
 
 
@@ -75,7 +37,7 @@ namespace Pic {
 	public:
 		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
 		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
-		[[nodiscard]] virtual Image Execute(Image img) override;
+		[[nodiscard]] virtual Image Execute(const Image& img) override;
 	public:
 		[[nodiscard]] static std::regex GetComparer();
 		[[nodiscard]] static bool Compare(const std::string& content);
@@ -96,7 +58,7 @@ namespace Pic {
 	public:
 		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
 		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
-		[[nodiscard]] virtual Image Execute(Image img) override;
+		[[nodiscard]] virtual Image Execute(const Image& img) override;
 	public:
 		[[nodiscard]] static std::regex GetComparer();
 		[[nodiscard]] static bool Compare(const std::string& content);
@@ -116,7 +78,7 @@ namespace Pic {
 	public:
 		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
 		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
-		[[nodiscard]] virtual Image Execute(Image img) override;
+		[[nodiscard]] virtual Image Execute(const Image& img) override;
 	public:
 		[[nodiscard]] static std::regex GetComparer();
 		[[nodiscard]] static bool Compare(const std::string& content);
@@ -136,7 +98,7 @@ namespace Pic {
 	public:
 		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
 		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
-		[[nodiscard]] virtual Image Execute(Image img) override;
+		[[nodiscard]] virtual Image Execute(const Image& img) override;
 	public:
 		[[nodiscard]] static std::regex GetComparer();
 		[[nodiscard]] static bool Compare(const std::string& content);
@@ -156,7 +118,7 @@ namespace Pic {
 	public:
 		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
 		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
-		[[nodiscard]] virtual Image Execute(Image img) override;
+		[[nodiscard]] virtual Image Execute(const Image& img) override;
 	public:
 		[[nodiscard]] static std::regex GetComparer();
 		[[nodiscard]] static bool Compare(const std::string& content);
@@ -177,7 +139,7 @@ namespace Pic {
 	public:
 		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
 		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
-		[[nodiscard]] virtual Image Execute(Image img) override;
+		[[nodiscard]] virtual Image Execute(const Image& img) override;
 	public:
 		[[nodiscard]] static std::regex GetComparer();
 		[[nodiscard]] static bool Compare(const std::string& content);
@@ -191,38 +153,19 @@ namespace Pic {
 	};
 
 
-	class ZoomCommand : public Command {
-	public:
-		ZoomCommand(std::string variableSrc, std::string variableTrg, float factor);
-		virtual ~ZoomCommand() = default;
-	public:
-		[[nodiscard]] virtual std::string GetSource() const override {return variableSource;}
-		[[nodiscard]] virtual std::string GetTarget() const override {return variableTarget;}
-		[[nodiscard]] virtual Image Execute(Image img) override;
-	public:
-		[[nodiscard]] static std::regex GetComparer();
-		[[nodiscard]] static bool Compare(const std::string& content);
-		[[nodiscard]] static Command* Create(const std::string& content);
-		[[nodiscard]] static std::string Save(const Command* command);
-		[[nodiscard]] virtual std::string ToString() const override {return Save(this);}
-	private:
-		std::string variableSource, variableTarget;
-		float factor;
-	};
-
 	/// Function to add all the geometrics Commands to the list of command
-	static inline void AddGeometricCommands() {
-		s_Command.insert(s_Command.end(), {
-			{FlipHorizontalCommand::Compare, FlipHorizontalCommand::Create, FlipHorizontalCommand::Save},
-			{FlipVerticalCommand::Compare, FlipVerticalCommand::Create, FlipVerticalCommand::Save},
-			{Rotate90Command::Compare, Rotate90Command::Create, Rotate90Command::Save},
-			{CropCommand::Compare, CropCommand::Create, CropCommand::Save},
-			{TranslateCommand::Compare, TranslateCommand::Create, TranslateCommand::Save},
-			{ResizeCommand::Compare, ResizeCommand::Create, ResizeCommand::Save},
-			{ShearCommand::Compare, ShearCommand::Create, ShearCommand::Save},
-			{RotateCommand::Compare, RotateCommand::Create, RotateCommand::Save},
-			{RemapCommand::Compare, RemapCommand::Create, RemapCommand::Save},
-			{ZoomCommand::Compare, ZoomCommand::Create, ZoomCommand::Save},
+	static inline void AddGeometricCommands(std::vector<CommandCreator>& commands) {
+		commands.insert(commands.end(), {
+			PC_COMMAND_CREATOR(FlipHorizontalCommand),
+			PC_COMMAND_CREATOR(FlipVerticalCommand),
+			PC_COMMAND_CREATOR(Rotate90Command),
+			PC_COMMAND_CREATOR(CropCommand),
+			PC_COMMAND_CREATOR(TranslateCommand),
+			PC_COMMAND_CREATOR(ResizeCommand),
+			PC_COMMAND_CREATOR(ShearCommand),
+			PC_COMMAND_CREATOR(RotateCommand),
+			PC_COMMAND_CREATOR(RemapCommand),
+			PC_COMMAND_CREATOR(ZoomCommand),
 		  });
 	}
 

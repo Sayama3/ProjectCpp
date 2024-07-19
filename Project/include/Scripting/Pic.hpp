@@ -24,20 +24,20 @@ namespace Pic {
 			Image result{};
 			Texture resultTex{};
 
-			void UpdateCommandFromString() {command.reset(CommandHelper::GetCommand(commandStr));}
+			void UpdateCommandFromString(const std::vector<CommandCreator>& commands) {command.reset(CommandHelper::GetCommand(commands, commandStr));}
 
 			operator bool() {return command.operator bool();}
 		};
 	public:
-		Pic() = default;
 		~Pic() = default;
 		Pic(const Pic&) = default;
 		Pic& operator=(const Pic&) = default;
 		Pic(Pic&& other) noexcept;
 		Pic& operator=(Pic&& other) noexcept;
 
-		Pic(const std::filesystem::path& path);
-		Pic(const std::string& picFileContent);
+		Pic(std::vector<CommandCreator> commands);
+		Pic(std::vector<CommandCreator> commands, const std::filesystem::path& path);
+		Pic(std::vector<CommandCreator> commands, const std::string& picFileContent);
 	public:
 		void AddCommand(std::string command);
 		void AddCommand(std::unique_ptr<Command> command);
@@ -50,5 +50,6 @@ namespace Pic {
 		[[nodiscard]] std::string ToString() const;
 	public:
 		std::vector<State> States;
+		std::vector<CommandCreator> Commands;
 	};
 }
