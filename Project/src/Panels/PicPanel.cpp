@@ -77,8 +77,8 @@ namespace PC {
 				auto* command = Pic::CommandHelper::GetCommand(state.States[i].commandStr);
 				if(command) {
 					state.States[i].command.reset(command);
+					if(index == -1) index = i;
 				}
-				if(index == -1) index = i;
 			}
 
 			{
