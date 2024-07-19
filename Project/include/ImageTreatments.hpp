@@ -62,7 +62,7 @@ namespace LocalTransformation {
 		return genericFilter(img, filter, true);
 	}
 
-	Image erode(const Image &img, int N) {
+	inline Image erode(const Image &img, int N) {
 		Image eroded(img.GetWidth(), img.GetHeight(), img.GetChannels(), img.GetImageType(), 0);
 		for (ImageIterator it(img); it != end(img); ++it) {
 			auto [filterIt, endIterator] = it.filterIterators(N / 2);
@@ -74,7 +74,7 @@ namespace LocalTransformation {
 		return eroded;
 	}
 
-	Image dilate(const Image &img, int N) {
+	inline Image dilate(const Image &img, int N) {
 		Image dilated(img.GetWidth(), img.GetHeight(), img.GetChannels(), img.GetImageType(), 0);
 		for (ImageIterator it(img); it != end(img); ++it) {
 			auto [filterIt, endIterator] = it.filterIterators(N / 2);
@@ -86,7 +86,7 @@ namespace LocalTransformation {
 		return dilated;
 	}
 
-	Image median(const Image &img, int N) {
+	inline Image median(const Image &img, int N) {
 		Image median(img.GetWidth(), img.GetHeight(), img.GetChannels(), img.GetImageType(), 0);
 		for (ImageIterator it(img); it != end(img); ++it) {
 			auto [filterIt, endIterator] = it.filterIterators(N / 2);
@@ -97,7 +97,7 @@ namespace LocalTransformation {
 		return median;
 	}
 
-	Image localConstrast(const Image &img, float factor, int N) {
+	inline Image localConstrast(const Image &img, float factor, int N) {
 		Image contrast(img.GetWidth(), img.GetHeight(), img.GetChannels(), img.GetImageType(), 0);
 		for (ImageIterator it(img); it != end(img); ++it) {
 			auto [filterIt, endIterator] = it.filterIterators(N / 2);
@@ -110,7 +110,7 @@ namespace LocalTransformation {
 		return contrast;
 	}
 
-	Image adaptiveThreshold(const Image &img, int offset, int N) {
+	inline Image adaptiveThreshold(const Image &img, int offset, int N) {
 		Image contrast(img.GetWidth(), img.GetHeight(), img.GetChannels(), img.GetImageType(), 0);
 		for (ImageIterator it(img); it != end(img); ++it) {
 			auto [filterIt, endIterator] = it.filterIterators(N / 2);
@@ -123,7 +123,7 @@ namespace LocalTransformation {
 		return contrast;
 	}
 
-	Image morphologicGradient(const Image &img, int N) {
+	inline Image morphologicGradient(const Image &img, int N) {
 		Image gradient(img.GetWidth(), img.GetHeight(), img.GetChannels(), img.GetImageType(), 0);
 		for (ImageIterator it(img); it != end(img); ++it) {
 			auto [filterIt, endIterator] = it.filterIterators(N / 2);
@@ -138,7 +138,7 @@ namespace LocalTransformation {
 		return gradient;
 	}
 
-	Image meanShift(const Image &img, int threshold, int N) {
+	inline Image meanShift(const Image &img, int threshold, int N) {
 		Image meanShifted(img.GetWidth(), img.GetHeight(), img.GetChannels(), img.GetImageType(), 0);
 		for (ImageIterator it(img); it != end(img); ++it) {
 			auto [filterIt, endIterator] = it.filterIterators(N / 2);

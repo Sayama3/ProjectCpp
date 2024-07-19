@@ -1,6 +1,6 @@
 #include "ImageTreatments.hpp"
 
-Image genericFilter(const Image &img, std::vector<std::vector<float>> filter,bool normalize) {
+Image LocalTransformation::genericFilter(const Image &img, std::vector<std::vector<float>> filter,bool normalize) {
     int N = filter.size();
     if (N%2==0 || !std::all_of(filter.begin(), filter.end(),
                      [N](auto &v) { return v.size() == N; }))
