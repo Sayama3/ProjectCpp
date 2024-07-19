@@ -31,8 +31,18 @@ namespace PC {
 
 	void PicPanel::UpdateStates()
 	{
+		std::vector<uint64_t> idToRemove;
 		for (auto& [id, state] : m_States) {
-			UpdateState(id, state);
+			bool open = true;
+			UpdateState(id, state, open);
+			if (!open) {
+				idToRemove.push_back(id);
+			}
+		}
+
+		for(auto id : idToRemove)
+		{
+			RemoveState(id);
 		}
 	}
 
@@ -56,10 +66,10 @@ namespace PC {
 		ImGui::End();
 	}
 
-	void PicPanel::UpdateState(uint64_t id, ::Pic::Pic &state)
+	void PicPanel::UpdateState(uint64_t id, ::Pic::Pic& state, bool& open)
 	{
 		std::string stateName = std::format("Pic {}", id);
-		ImGui::Begin(stateName.c_str());
+		ImGui::Begin(stateName.c_str(), &open);
 		{
 
 			uint64_t index = -1;

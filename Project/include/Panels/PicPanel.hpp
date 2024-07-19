@@ -20,7 +20,7 @@ namespace PC {
 	private:
 		void UpdateMainMenu();
 		void UpdateStates();
-		void UpdateState(uint64_t id, Pic::Pic& state);
+		void UpdateState(uint64_t id, Pic::Pic& state, bool& open);
 
 		void SaveState(Pic::Pic& state, const std::filesystem::path& path);
 	private:
