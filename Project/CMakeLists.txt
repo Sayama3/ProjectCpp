@@ -52,6 +52,11 @@ set(SRC src/main.cpp
 
         include/ImGui/imgui_stdlib.h
         src/ImGui/imgui_stdlib.cpp
+        src/GeometricTransformation.cpp
+        include/GeometricTransformation.hpp
+        include/Core/Math.hpp
+        src/Scripting/GeometricCommands.cpp
+        include/Scripting/GeometricCommands.hpp
 )
 
 add_executable(${EXE_TARGET_NAME} ${SRC})
