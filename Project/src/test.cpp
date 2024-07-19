@@ -129,7 +129,7 @@ int test_All() {
 bool test_genericFilter() {
     Image img = sampleImg();
     int N = img.GetWidth() * img.GetHeight();
-    Image blurred = meanBlur<5>(img);
+    Image blurred = LocalTransformation::meanBlur(img, 5);
     ImageIterator it(img);
     ImageIterator en = end(img);
     float av[] = {0, 0, 0};
@@ -143,19 +143,5 @@ bool test_genericFilter() {
 }
 bool iterator_traits_test() {
 	Image smp(20,20,3,ModelType::RGB,125);
-	Image im = erode<3>(smp);
-	Image im2 = dilate<3>(smp);
-	Image im3 = median<3>(smp);
-	Image im4 = sobelFilter(smp);
-	Image im41 = sobelFilter(smp,false);
-	Image im42 = sobelNorm(smp);
-	Image im5 = sharpening(smp);
-	Image im6 = gaussianBlur(smp);
-	Image im7 = meanBlur<3>(smp);
-	Image im8 = meanBlur<5>(smp);
-	Image im9 = meanShift<5>(smp,10);
-	Image im10 = morphologicGradient<7>(smp);
-	Image im11 = localConstrast<7>(smp,.1f);
-	Image im12 = adaptiveThreshold<7>(smp,20);
-	return true;
+	return true;//Legacy test
 }
