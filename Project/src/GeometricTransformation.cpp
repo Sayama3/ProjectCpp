@@ -79,8 +79,8 @@ namespace GeometricTransformation {
 		Image image(newWidth, newHeight, img.GetChannels(), img.GetImageType(), 0);
 		for (int x = 0; x < newWidth; ++x) {
 			for (int y = 0; y < newHeight; ++y) {
-				auto orgX = x/newWidth * img.GetWidth();
-				auto orgY = y/newHeight * img.GetHeight();
+				uint32_t orgX = (float(x)/float(newWidth)) * img.GetWidth();
+				uint32_t orgY = (float(y)/float(newHeight)) * img.GetHeight();
 				for (int c = 0; c < img.GetChannels(); ++c) {
 					image(x,y,c) = img(orgX,orgY,c);
 				}
@@ -142,34 +142,40 @@ namespace GeometricTransformation {
 		return image;
 	}
 	Image Zoom(const Image &img, float factor) {
-		uint32_t width = img.GetWidth();
-		uint32_t height = img.GetHeight();
-		uint32_t newWidth = img.GetWidth() * factor;
-		uint32_t newHeight = img.GetHeight() * factor;
+		const uint32_t width = img.GetWidth();
+		const uint32_t height = img.GetHeight();
+
+		const uint32_t newWidth = width * factor;
+		const uint32_t newHeight = height * factor;
+
 		Image image(newWidth, newHeight, img.GetChannels(), img.GetImageType(), 0);
 		for (int x = 0; x < newWidth; ++x) {
 			for (int y = 0; y < newHeight; ++y) {
-				float org_x = float(x) / factor;
-				float org_y = float(y) / factor;
+				float orgX = float(x) / factor;
+				float orgY = float(y) / factor;
+				float minX = std::floor(orgX);
+				float minY = std::floor(orgY);
+				float maxX = std::clamp(minX + 1.0f, 0.0f, float(width - 1));
+				float maxY = std::clamp(minY + 1.0f, 0.0f, float(height - 1));
 
-				uint32_t o_0x= std::clamp(std::floor(org_x)+0, 0.0f, float(width-1));
-				uint32_t o_1x= std::clamp(std::floor(org_x)+0, 0.0f, float(width-1));
-				uint32_t o_2x= std::clamp(std::floor(org_x)+1, 0.0f, float(width-1));
-				uint32_t o_3x= std::clamp(std::floor(org_x)+1, 0.0f, float(width-1));
+				Vec2 org{orgX, orgY};
+				Vec2UI org00 {uint32_t(minX), uint32_t(minY)};
+				Vec2UI org01 {uint32_t(minX), uint32_t(maxY)};
+				Vec2UI org10 {uint32_t(maxX), uint32_t(minY)};
+				Vec2UI org11 {uint32_t(maxX), uint32_t(maxY)};
 
-				uint32_t o_0y = std::clamp(std::floor(org_y)+0, 0.0f, float(height-1));
-				uint32_t o_1y = std::clamp(std::floor(org_y)+1, 0.0f, float(height-1));
-				uint32_t o_2y = std::clamp(std::floor(org_y)+0, 0.0f, float(height-1));
-				uint32_t o_3y = std::clamp(std::floor(org_y)+1, 0.0f, float(height-1));
+				float tX = maxX - orgX;
+				float tY = maxY - orgY;
 
-				for (int chan = 0; chan < img.GetChannels(); ++chan) {
-					float wholeA;
-					float wholeB;
-					float wholeC;
-					auto a = std::lerp(std::modf(org_y, &wholeA), img(o_0x,o_0y, chan), img(o_1x,o_1y, chan));
-					auto b = std::lerp(std::modf(org_y, &wholeB), img(o_2x,o_2y, chan), img(o_3x,o_3y, chan));
-					auto c = std::lerp(std::modf(org_x, &wholeC), a, b);
-					image(x,y,chan) = std::clamp(c, 0.0, 255.0);
+				for (int c = 0; c < image.GetChannels(); ++c) {
+					float col00 = img(org00.x, org00.y, c);
+					float col10 = img(org10.x, org10.y, c);
+					float colT0 = std::lerp(col00, col10, tX);
+					float col01 = img(org01.x, org01.y, c);
+					float col11 = img(org11.x, org11.y, c);
+					float colT1 = std::lerp(col01, col11, tX);
+					float colTT = std::lerp(colT1, colT1, tY);
+					image(x,y,c) = (uint8_t)std::clamp(colTT, 0.0f, 255.0f);
 				}
 			}
 		}
