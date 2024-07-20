@@ -13,7 +13,7 @@ namespace Pic {
 		PC_IMPL_NO_PARAM_COMMAND(SobelFilterVCommand, LocalTransformation::sobelV, "sobelV");
 	};
 	class SobelNormCommand : public TCommandNoParam<SobelNormCommand> {
-		PC_IMPL_NO_PARAM_COMMAND(SobelNormCommand, LocalTransformation::sobelNorm, "sobelNormn");
+		PC_IMPL_NO_PARAM_COMMAND(SobelNormCommand, LocalTransformation::sobelNorm, "sobelNorm");
 	};
 	class SharpeningCommand : public TCommandNoParam<SharpeningCommand> {
 		PC_IMPL_NO_PARAM_COMMAND(SharpeningCommand, LocalTransformation::sharpening, "sharpen");
