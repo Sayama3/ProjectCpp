@@ -36,6 +36,16 @@ namespace Pic {
 	class MorpholicGradientCommand : public IntCommand<MorpholicGradientCommand> {
 		PC_IMPL_INT_COMMAND(MorpholicGradientCommand, LocalTransformation::morphologicGradient, "morphologicGradient");
 	};
+	class LocalConstrastCommand : public IntFloatCommand<LocalConstrastCommand> {
+		PC_IMPL_INT_FLT_COMMAND(LocalConstrastCommand, LocalTransformation::localConstrast, "localContrast");
+	};
+	class MeanShiftCommand : public IntFloatCommand<MeanShiftCommand> {
+		PC_IMPL_INT_FLT_AS_INT_COMMAND(MeanShiftCommand, LocalTransformation::meanShift, "meanShift");
+	};
+	class AdpatativeThresholdCommand : public IntFloatCommand<AdpatativeThresholdCommand> {
+		PC_IMPL_INT_FLT_AS_INT_COMMAND(AdpatativeThresholdCommand, LocalTransformation::adaptiveThreshold, "adThresh");
+	};
+
 	//TODO localConstrast with float + N and meanShift+adpatative THreshold with int + N
 	static inline void AddLocalCommands(std::vector<CommandCreator> &commands) {
 		commands.insert(commands.end(), {
@@ -49,6 +59,9 @@ namespace Pic {
 												PC_COMMAND_CREATOR(DilateCommand),
 												PC_COMMAND_CREATOR(MedianCommand),
 												PC_COMMAND_CREATOR(MorpholicGradientCommand),
+												PC_COMMAND_CREATOR(LocalConstrastCommand),
+												PC_COMMAND_CREATOR(MeanShiftCommand),
+												PC_COMMAND_CREATOR(AdpatativeThresholdCommand),
 
 										});
 	}
