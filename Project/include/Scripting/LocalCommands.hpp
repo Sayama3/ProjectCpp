@@ -6,45 +6,35 @@
 #include "TemplatedCommands.hpp"
 
 namespace Pic {
-	class SobelFilterHCommand : public TCommandNoParam<SobelFilterHCommand>
-	{
-		PC_IMPL_NO_PARAM_COMMAND(SobelFilterHCommand, LocalTransformation::sobelH, "sobel horizontal");
+	class SobelFilterHCommand : public TCommandNoParam<SobelFilterHCommand> {
+		PC_IMPL_NO_PARAM_COMMAND(SobelFilterHCommand, LocalTransformation::sobelH, "sobelH")
 	};
-	class SobelFilterVCommand : public TCommandNoParam<SobelFilterVCommand>
-	{
-		PC_IMPL_NO_PARAM_COMMAND(SobelFilterVCommand, LocalTransformation::sobelV, "sobel vertical");
+	class SobelFilterVCommand : public TCommandNoParam<SobelFilterVCommand> {
+		PC_IMPL_NO_PARAM_COMMAND(SobelFilterVCommand, LocalTransformation::sobelV, "sobelV");
 	};
-	class SobelNormCommand : public TCommandNoParam<SobelNormCommand>
-	{
-		PC_IMPL_NO_PARAM_COMMAND(SobelNormCommand, LocalTransformation::sobelNorm, "sobel norm");
+	class SobelNormCommand : public TCommandNoParam<SobelNormCommand> {
+		PC_IMPL_NO_PARAM_COMMAND(SobelNormCommand, LocalTransformation::sobelNorm, "sobelNormn");
 	};
-	class SharpeningCommand : public TCommandNoParam<SharpeningCommand>
-	{
-		PC_IMPL_NO_PARAM_COMMAND(SharpeningCommand, LocalTransformation::sharpening, "sharpening");
+	class SharpeningCommand : public TCommandNoParam<SharpeningCommand> {
+		PC_IMPL_NO_PARAM_COMMAND(SharpeningCommand, LocalTransformation::sharpening, "sharpen");
 	};
-	class GaussianBlurCommand : public TCommandNoParam<GaussianBlurCommand>
-	{
-		PC_IMPL_NO_PARAM_COMMAND(GaussianBlurCommand, LocalTransformation::gaussianBlur, "gaussian blur");
+	class GaussianBlurCommand : public TCommandNoParam<GaussianBlurCommand> {
+		PC_IMPL_NO_PARAM_COMMAND(GaussianBlurCommand, LocalTransformation::gaussianBlur, "gaussianBlur");
 	};
-	class MeanBlurCommand : public IntCommand<MeanBlurCommand>
-	{
-		PC_IMPL_INT_COMMAND(MeanBlurCommand, LocalTransformation::meanBlur, "mean blur");
+	class MeanBlurCommand : public IntCommand<MeanBlurCommand> {
+		PC_IMPL_INT_COMMAND(MeanBlurCommand, LocalTransformation::meanBlur, "meanBlur");
 	};
-	class ErodeCommand : public IntCommand<ErodeCommand>
-	{
+	class ErodeCommand : public IntCommand<ErodeCommand> {
 		PC_IMPL_INT_COMMAND(ErodeCommand, LocalTransformation::erode, "erode");
 	};
-	class DilateCommand : public IntCommand<DilateCommand>
-	{
+	class DilateCommand : public IntCommand<DilateCommand> {
 		PC_IMPL_INT_COMMAND(DilateCommand, LocalTransformation::dilate, "dilate");
 	};
-	class MedianCommand : public IntCommand<MedianCommand>
-	{
+	class MedianCommand : public IntCommand<MedianCommand> {
 		PC_IMPL_INT_COMMAND(MedianCommand, LocalTransformation::median, "median");
 	};
-	class MorpholicGradientCommand : public IntCommand<MorpholicGradientCommand>
-	{
-		PC_IMPL_INT_COMMAND(MorpholicGradientCommand, LocalTransformation::morphologicGradient, "morph open");
+	class MorpholicGradientCommand : public IntCommand<MorpholicGradientCommand> {
+		PC_IMPL_INT_COMMAND(MorpholicGradientCommand, LocalTransformation::morphologicGradient, "morphologicGradient");
 	};
 	//TODO localConstrast with float + N and meanShift+adpatative THreshold with int + N
 	static inline void AddLocalCommands(std::vector<CommandCreator> &commands) {
