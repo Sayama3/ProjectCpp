@@ -5,6 +5,32 @@
 #include "Scripting/Commands.hpp"
 #include <stb_image_write.h>
 
+void replace_all(
+		std::string& s,
+		const std::string & toReplace,
+		const std::string & replaceWith
+) {
+	std::string buf;
+	std::size_t pos = 0;
+	std::size_t prevPos;
+
+	// Reserves rough estimate of final size of string.
+	buf.reserve(s.size());
+
+	while (true) {
+		prevPos = pos;
+		pos = s.find(toReplace, pos);
+		if (pos == std::string::npos)
+			break;
+		buf.append(s, prevPos, pos - prevPos);
+		buf += replaceWith;
+		pos += toReplace.size();
+	}
+
+	buf.append(s, prevPos, s.size() - prevPos);
+	s.swap(buf);
+}
+
 namespace Pic {
 	LoadCommand::LoadCommand(std::filesystem::path path, std::string variable) : source(std::move(path)), variableStore(std::move(variable)) {
 	}
@@ -14,7 +40,7 @@ namespace Pic {
 	}
 
 	std::regex LoadCommand::GetComparer() {
-		return std::regex(R"(\s*load\s+([\w\.\\\/\:]+)\s+in\s+([\w]+)\s*)", std::regex_constants::icase);
+		return std::regex(R"(\s*load\s+([\{\}\w\.\\\/\:]+)\s+in\s+([\w]+)\s*)", std::regex_constants::icase);
 	}
 
 	bool LoadCommand::Compare(const std::string &content) {
@@ -24,7 +50,9 @@ namespace Pic {
 	Command *LoadCommand::Create(const std::string &content) {
 		std::smatch smatch;
 		if(!std::regex_search(content, smatch, GetComparer())) return nullptr;
-		std::filesystem::path path = std::string(smatch[1]);
+		auto spath = std::string(smatch[1]);
+		replace_all(spath, "{{DATA}}", PC_DATA_PATH);
+		std::filesystem::path path = spath;
 		std::string variable = smatch[2];
 		return new LoadCommand(path, variable);
 	}
@@ -45,7 +73,7 @@ namespace Pic {
 	}
 
 	std::regex SaveCommand::GetComparer() {
-		return std::regex(R"(\s*save\s+([\w]+)\s+in\s+([\w\.\\\/\:]+)\s*)", std::regex_constants::icase);
+		return std::regex(R"(\s*save\s+([\w]+)\s+in\s+([\w\.\\\/\:\{\}]+)\s*)", std::regex_constants::icase);
 	}
 
 	bool SaveCommand::Compare(const std::string &content) {
@@ -56,7 +84,9 @@ namespace Pic {
 		std::smatch smatch;
 		if(!std::regex_search(content, smatch, GetComparer())) return nullptr;
 		std::string variable = smatch[1];
-		std::filesystem::path path = std::string(smatch[2]);
+		auto spath = std::string(smatch[2]);
+		replace_all(spath, "{{DATA}}", PC_DATA_PATH);
+		std::filesystem::path path = spath;
 		return new SaveCommand(variable, path);
 	}
 
