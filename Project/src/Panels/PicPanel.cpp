@@ -54,13 +54,14 @@ namespace PC {
 	{
 		ImGui::Begin("Pic Panel");
 		{
+			ImGui::InputText(".pic", &fileName);
 			if(ImGui::Button("Load Pic File")) {
-//				std::filesystem::path p;
-				//TODO: Search for a file a load if found.
+				std::filesystem::path p(std::string(PC_DATA_PATH)+"/Pic/"+fileName+".pic");
 				std::string str;
-//				FS::ReadTextInFile(p,str);
+				FS::ReadTextInFile(p,str);
 				::Pic::Pic sc(m_Commands, str);
-				AddState(std::move(sc));
+				auto id = AddState(std::move(sc));
+				m_States.at(id).Execute();
 			}
 
 			if(ImGui::Button("New Pic")) {
@@ -117,10 +118,9 @@ namespace PC {
 			if(ImGui::Button("Re-run")) {
 				state.Execute();
 			}
-
+			ImGui::InputText(".pic", &fileName);
 			if(ImGui::Button("Save")) {
-				std::filesystem::path p;
-				// TODO: Fetch path
+				std::filesystem::path p(std::string(PC_DATA_PATH)+"/Pic/"+fileName+".pic");
 				SaveState(state, p);
 			}
 		}

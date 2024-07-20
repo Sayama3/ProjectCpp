@@ -18,6 +18,7 @@ namespace PC {
 		virtual void PostUpdate(float dt) override;
 		virtual void End() override;
 	private:
+		std::string fileName = "lastPic";
 		void UpdateMainMenu();
 		void UpdateStates();
 		void UpdateState(uint64_t id, Pic::Pic& state, bool& open);
