@@ -3,11 +3,12 @@
 //
 
 #include "Panels/ImageCreator.hpp"
+#include "ImageHelper.hpp"
 #include "Panels/ImageCreator.hpp"
 
 #include <imgui.h>
-#include <imgui_impl_opengl3.h>
 #include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 #include <portable-file-dialogs.h>
 #include <stb_image_write.h>
@@ -22,7 +23,7 @@ namespace PC {
 				if (ImGui::Button("Create")) {
 					Image* im=new Image(path);
 					images.push_back(im);
-					imagesTexture[images.size()-1] = {im->GetTextureSpec(), im->GetImageBuffer()};
+					imagesTexture[images.size()-1] = TextureHelper::ImageToTexture(*im);//{im->GetTextureSpec(), im->GetImageBuffer()};
 				}
 			}
 
@@ -486,10 +487,10 @@ namespace PC {
 
 				if(ImGui::CollapsingHeader("Image")) {
 					if(ImGui::Button("Update Image")) {
-						imagesTexture[index] = {img.GetTextureSpec(), img.GetImageBuffer()};
+						imagesTexture[index] = TextureHelper::ImageToTexture(img);//{img.GetTextureSpec(), img.GetImageBuffer()};
 					}
 					if(img.Dirty) {
-						imagesTexture[index] = {img.GetTextureSpec(), img.GetImageBuffer()};
+						imagesTexture[index] = TextureHelper::ImageToTexture(img);//{img.GetTextureSpec(), img.GetImageBuffer()};
 						img.Dirty = false;
 					}
 					ImGui::SliderFloat("Image Size", &imagesValues[index].sizeMultiplier, 0.01f, 1.00f, "%.2f");
@@ -504,7 +505,7 @@ namespace PC {
 				if (ImGui::Button("Duplicate"))
 				{
 					images.push_back(new Image(img));
-					imagesTexture[images.size() - 1] = {images.back()->GetTextureSpec(), images.back()->GetImageBuffer()};
+					imagesTexture[images.size() - 1] = TextureHelper::ImageToTexture(*images.back());//{images.back()->GetTextureSpec(), images.back()->GetImageBuffer()};
 				}
 
 				if (ImGui::Button("Save"))
@@ -536,7 +537,7 @@ namespace PC {
 	ImageCreator::ImageCreator() {
 		auto im = new Image(path);
 		images.push_back(im);
-		imagesTexture[images.size() - 1] = {im->GetTextureSpec(), im->GetImageBuffer()};
+		imagesTexture[images.size() - 1] = TextureHelper::ImageToTexture(*im);//{im->GetTextureSpec(), im->GetImageBuffer()};
 	}
 	ImageCreator::~ImageCreator() {
 		// Delete all the image to avoid memory leaks
