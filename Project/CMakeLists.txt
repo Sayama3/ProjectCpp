@@ -60,6 +60,8 @@ set(SRC src/main.cpp
         include/Scripting/TemplatedCommands.hpp
         src/Scripting/LocalCommands.cpp
         include/Scripting/LocalCommands.hpp
+        src/ImageHelper.cpp
+        include/ImageHelper.hpp
 )
 
 add_executable(${EXE_TARGET_NAME} ${SRC})

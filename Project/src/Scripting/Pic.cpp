@@ -4,8 +4,9 @@
 
 #include "Scripting/Pic.hpp"
 #include "Core/FileSystem.hpp"
-#include <string>
+#include "ImageHelper.hpp"
 #include <sstream>
+#include <string>
 
 
 using namespace PC;
@@ -69,7 +70,7 @@ namespace Pic {
 			const Image* imgPtr = state.command->HasSource() ? GetImage(state.command->GetSource(), i) : nullptr;
 			state.result = std::move(state.command->Execute(imgPtr ? *imgPtr : Image{}));
 			if(state.command->HasTarget()) {
-				state.resultTex = {state.result.GetTextureSpec(), state.result.GetImageBuffer()};
+				state.resultTex = TextureHelper::ImageToTexture(state.result);//{state.result.GetTextureSpec(), state.result.GetImageBuffer()};
 			}
 		}
 	}
