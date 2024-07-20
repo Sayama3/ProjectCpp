@@ -105,7 +105,7 @@ namespace LocalTransformation {
 		return median;
 	}
 
-	inline Image localConstrast(const Image &img, float factor, int N) {
+	inline Image localConstrast(const Image &img, int N, float factor) {
 		Image contrast(img.GetWidth(), img.GetHeight(), img.GetChannels(), img.GetImageType(), 0);
 		for (ImageIterator it(img); it != end(img); ++it) {
 			auto [filterIt, endIterator] = it.filterIterators(N / 2);
@@ -118,7 +118,7 @@ namespace LocalTransformation {
 		return contrast;
 	}
 
-	inline Image adaptiveThreshold(const Image &img, int offset, int N) {
+	inline Image adaptiveThreshold(const Image &img, int N, int offset) {
 		Image contrast(img.GetWidth(), img.GetHeight(), img.GetChannels(), img.GetImageType(), 0);
 		for (ImageIterator it(img); it != end(img); ++it) {
 			auto [filterIt, endIterator] = it.filterIterators(N / 2);
@@ -146,7 +146,7 @@ namespace LocalTransformation {
 		return gradient;
 	}
 
-	inline Image meanShift(const Image &img, int threshold, int N) {
+	inline Image meanShift(const Image &img, int N, int threshold) {
 		Image meanShifted(img.GetWidth(), img.GetHeight(), img.GetChannels(), img.GetImageType(), 0);
 		for (ImageIterator it(img); it != end(img); ++it) {
 			auto [filterIt, endIterator] = it.filterIterators(N / 2);
