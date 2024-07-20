@@ -7,7 +7,15 @@
 #include "numeric"
 #include <algorithm>
 namespace LocalTransformation {
-
+	inline pixel cast(double v) {
+		return static_cast<pixel>(std::clamp<int>(v, 0, 255));
+	}
+	inline pixel cast(float v) {
+		return static_cast<pixel>(std::clamp<int>(v, 0, 255));
+	}
+	inline pixel cast(int v) {
+		return static_cast<pixel>(std::clamp<int>(v, 0, 255));
+	}
 	Image genericFilter(const Image &img, std::vector<std::vector<float>> filter, bool normalize = false);
 	inline Image sobelFilter(const Image &img, bool horizontal = true) {
 		std::vector<std::vector<float>> sobelFilterMatrix;
@@ -33,7 +41,7 @@ namespace LocalTransformation {
 		Image sob2 = sobelFilter(img, false);
 		Image result = Image(img.GetWidth(), img.GetHeight(), img.GetChannels(), img.GetImageType(), 0);
 		for (ImageIterator it(img); it != end(img); ++it) {
-			it.atOther(result) = static_cast<uint8_t>(std::sqrt(std::pow(it.atOther(sob1), 2) + std::pow(it.atOther(sob2), 2)));
+			it.atOther(result) = cast(std::sqrt(std::pow(it.atOther(sob1), 2) + std::pow(it.atOther(sob2), 2)));
 		}
 		return result;
 	}
@@ -68,7 +76,7 @@ namespace LocalTransformation {
 			auto [filterIt, endIterator] = it.filterIterators(N / 2);
 			uint8_t min = *filterIt;
 			for (; filterIt != endIterator; ++filterIt)
-				min = std::max(min, *filterIt);
+				min = std::min(min, *filterIt);
 			it.atOther(eroded) = min;
 		}
 		return eroded;
@@ -105,7 +113,7 @@ namespace LocalTransformation {
 			int sum = 0;
 			for (; filterIt != endIterator; ++filterIt, ++cnt)
 				sum += *filterIt;
-			it.atOther(contrast) += static_cast<uint8_t>(factor * ((*it) - sum / cnt));
+			it.atOther(contrast) += cast(factor * ((*it) - sum / cnt));
 		}
 		return contrast;
 	}
@@ -133,7 +141,7 @@ namespace LocalTransformation {
 				max = std::max(max, *filterIt);
 				min = std::min(min, *filterIt);
 			}
-			it.atOther(gradient) = max - min;
+			it.atOther(gradient) = cast(max - min);
 		}
 		return gradient;
 	}
@@ -150,7 +158,7 @@ namespace LocalTransformation {
 					cnt++;
 				}
 			}
-			it.atOther(meanShifted) = sum / cnt;
+			it.atOther(meanShifted) = cast(sum / cnt);
 		}
 		return meanShifted;
 	}
